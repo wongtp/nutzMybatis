@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-Mapper.dtd">
+<mapper namespace="com.wong.base">
+	<select id="getDataRecord" resultType="dataRecord">
+		SELECT * FROM ${TABLE_NAME} t
+		where 1 = 1
+		and ${PRIMARY_KEY} = #{PRIMARY_KEY_VALUE}
+	</select>
+	
+	<select id="getTableList" resultType="dataRecord">
+		SELECT * FROM ${TABLE_NAME} t
+		where 1 = 1
+		<if test="PARAMETERS != null">
+			<foreach collection="PARAMETERS" index="key"  item="value" separator=" and " >
+	        	${key} = #{value}
+		    </foreach>
+		</if>
+	</select>
+	
+	<select id="getCount" resultType="java.lang.Long">
+		SELECT count(0) FROM ${TABLE_NAME} t where 1 = 1
+		<if test="PARAMETERS != null">
+			<foreach collection="PARAMETERS" index="key"  item="value" separator=" and " >
+	        	${key} = #{value} 
+		    </foreach>
+		</if>
+	</select>
+	
+	<delete id="delete" parameterType="Map">
+		delete from ${TABLE_NAME} WHERE ${PRIMARY_KEY} = #{PRIMARY_KEY_VALUE}
+	</delete>
+	
+	<delete id="deleteByIDs" parameterType="Map">
+		delete from ${TABLE_NAME} WHERE ${PRIMARY_KEY} in (${PRIMARY_KEY_VALUE})
+	</delete>
+	
+	<delete id="deleteByParam" parameterType="Map">
+		<if test="PARAMETERS != null and TABLE_NAME!=null and TABLE_NAME != '' ">
+			delete from ${TABLE_NAME} WHERE 1 = 1
+			<foreach collection="PARAMETERS" index="key"  item="value" separator=" and " >
+	        	${key} = #{value}
+		    </foreach>
+	    </if>
+	</delete>
+	
+	<update id="update" parameterType="Map">
+		update ${TABLENAME_STATEMENT} SET ${VALUES_STATEMENT} <if test="WHERE_STATEMENT != null and WHERE_STATEMENT != ''"> where ${WHERE_STATEMENT} </if> 
+	</update>
+	
+	<insert id="insert" parameterType="Map">
+		insert into ${TABLE_NAME}(${COLUMNS}) values(${VALUES})
+	</insert>
+	
+	<insert id="insertList" parameterType="Map">
+		insert into ${TABLENAME_STATEMENT}(${COLUMNS_STATEMENT})
+		<foreach collection="LIST" item="item" separator="union">
+			select ${ITEM_STATEMENT} from dual
+		</foreach>
+	</insert>
+</mapper>
