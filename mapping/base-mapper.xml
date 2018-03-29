@@ -53,7 +53,7 @@
 	
 	<insert id="insertList" parameterType="Map">
 		insert into ${TABLENAME_STATEMENT}(${COLUMNS_STATEMENT})
-		<foreach collection="LIST" item="item" separator="union">
+		<foreach collection="LIST" item="item" separator=" union ">
 			select ${ITEM_STATEMENT} from dual
 		</foreach>
 	</insert>

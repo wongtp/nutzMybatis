@@ -7,6 +7,11 @@ import org.apache.ibatis.session.SqlSession;
 
 import cn.wizzer.app.wb.modules.common.nutzMybatis.dto.DataRecord;
 
+/**
+ * @author 黄小天 wongtp@outlook.com
+ * @date 2018年3月27日 下午2:22:10
+ * @describe 配合  base-mapper.xml 封装了少量 CRUD 的操作，复杂点的的还是建议自己写吧~我是不会帮你写的
+ */
 public interface BaseDao {
 	
 	/**
