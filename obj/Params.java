@@ -20,16 +20,21 @@ public class Params extends HashMap<String, Object> {
 	
 	@SuppressWarnings("unchecked")
 	public <T> T getObj(String key) {
-		return (T) this.get(key);
+		T t = null;
+		try {
+			t = (T) this.get(key);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return t;
 	}
 	
 	public static Params NEW(String key, Object value) {
 		return new Params(key, value);
 	}
 	
-	public Params add(String key, Object value) {
-		this.put(key, value);
+	public Params put(String key, Object value) {
+		super.put(key, value);
 		return this;
 	}
-	
 }
