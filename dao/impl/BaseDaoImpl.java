@@ -48,7 +48,6 @@ public class BaseDaoImpl extends SqlSessionFactoryBean implements BaseDao {
 			obj = session.selectOne(statement, parameters);
 		} catch (Exception e) {
 			e.printStackTrace();
-			log.error(e);
 		} finally {
 			if (log.isDebugEnabled()) {
 				BoundSql sqlLog = session.getConfiguration().getMappedStatement(statement).getBoundSql(parameters);
@@ -94,7 +93,6 @@ public class BaseDaoImpl extends SqlSessionFactoryBean implements BaseDao {
 			obj = session.selectList(statement, parameters);
 		} catch (Exception e) {
 			e.printStackTrace();
-			log.error(e);
 		} finally {
 			if (log.isDebugEnabled()) {
 				BoundSql sqlLog = session.getConfiguration().getMappedStatement(statement).getBoundSql(parameters);
@@ -132,7 +130,6 @@ public class BaseDaoImpl extends SqlSessionFactoryBean implements BaseDao {
 			obj = session.delete(statement, parameters);
 		} catch (Exception e) {
 			e.printStackTrace();
-			log.error(e);
 		} finally {
 			if (log.isDebugEnabled()) {
 				BoundSql sqlLog = session.getConfiguration().getMappedStatement(statement).getBoundSql(parameters);
@@ -189,7 +186,6 @@ public class BaseDaoImpl extends SqlSessionFactoryBean implements BaseDao {
 		} catch (Exception e) {
 			session.rollback();
 			e.printStackTrace();
-			log.error(e);
 		} finally {
 			if (log.isDebugEnabled()) {
 				BoundSql sqlLog = session.getConfiguration().getMappedStatement(statement).getBoundSql(parameters);
@@ -268,7 +264,6 @@ public class BaseDaoImpl extends SqlSessionFactoryBean implements BaseDao {
 		} catch (Exception e) {
 			session.rollback();
 			e.printStackTrace();
-			log.error(e);
 		} finally {
 			if (log.isDebugEnabled()) {
 				BoundSql sqlLog = session.getConfiguration().getMappedStatement(statement).getBoundSql(null);
@@ -331,7 +326,6 @@ public class BaseDaoImpl extends SqlSessionFactoryBean implements BaseDao {
 		} catch (Exception e) {
 			session.rollback();
 			e.printStackTrace();
-			log.error(e);
 		} finally {
 			if (log.isDebugEnabled()) {
 				BoundSql sqlLog = session.getConfiguration().getMappedStatement(statement).getBoundSql(parameters);

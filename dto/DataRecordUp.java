@@ -15,9 +15,4 @@ public class DataRecordUp extends DataRecord implements Serializable {
     public Object put(String key, Object value) {
     	return super.put(key.toUpperCase(), value);
     }
-	
-	@Override
-    public Object get(String key) {
-		return super.get(key.toUpperCase());
-    }
 }

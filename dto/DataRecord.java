@@ -7,8 +7,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 
-import org.nutz.log.Log;
-import org.nutz.log.Logs;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author 黄小天 wongtp@outlook.com
@@ -17,7 +17,7 @@ import org.nutz.log.Logs;
  */
 public class DataRecord extends HashMap<String, Object> implements Serializable {
 	
-	private static final Log log = Logs.get();
+	private static final Logger logger = LoggerFactory.getLogger(DataRecord.class);
 	private static final long serialVersionUID = 1L;
 
 	public DataRecord() {}
@@ -32,35 +32,19 @@ public class DataRecord extends HashMap<String, Object> implements Serializable 
 	}
 
     public Object get(String key) {
-		return super.get(key);
+		return super.get(((String)key));
     }
     
     public String getString(String key) {
     	try{
-    		Object val = get(key);
-    		if(null == val) return null;
-    			return val.toString();
-    	}catch(ClassCastException e) {
-    		log.error("数据转换异常【key：" + key + ", value：" + get(key) + "】", e);
-    		return null;
-    	}
-    }
-    
-    public Boolean getBoolean(String key) {
-    	try{
     		Object value = get(key);
-        	if(value instanceof Boolean) {
-    			return ((Boolean)value).booleanValue();
-    		}else if(value instanceof String) {
-    			try {
-    				return Boolean.valueOf((String)value);
-    			} catch (Exception e) {
-    				return null;
-    			}
+    		if(value != null) {
+    			return value.toString();
+    		}else {
+    			return null;
     		}
-    		return null;
     	}catch(ClassCastException e) {
-    		log.error("数据转换异常【key：" + key + ", value：" + get(key) + "】", e);
+    		logger.warn("数据转换异常【key：" + key + ", value：" + get(key) + "】", e);
     		return null;
     	}
     }
@@ -68,20 +52,10 @@ public class DataRecord extends HashMap<String, Object> implements Serializable 
     public Long getLong(String key) {
     	try{
     		Object value = get(key);
-        	if(value instanceof BigDecimal) {
-    			return ((BigDecimal)value).longValue();
-    		}else if(value instanceof Long) {
-    			return (Long)value;
-    		}else if(value instanceof String) {
-    			try {
-    				return Long.valueOf((String)value);
-    			} catch (Exception e) {
-    				return null;
-    			}
-    		}
-    		return null;
+    		Long val = Long.valueOf(value.toString());
+    		return val;
     	}catch(Exception e){
-    		log.error("数据转换异常【key：" + key + ", value：" + get(key) + "】", e);
+    		logger.warn("数据转换异常【key：" + key + ", value：" + get(key) + "】", e);
     		return null;
     	}
     }
@@ -89,41 +63,20 @@ public class DataRecord extends HashMap<String, Object> implements Serializable 
     public Integer getInteger(String key) {
     	try{
     		Object value = get(key);
-    		if(value instanceof BigDecimal) {
-    			return ((BigDecimal)value).intValue();
-    		}else if(value instanceof Integer) {
-    			return (Integer)value;
-    		}else if(value instanceof String) {
-    			try {
-    				return Integer.valueOf((String)value);
-    			} catch (Exception e) {
-    				return null;
-    			}
-    		}
-    		return null;
+    		Integer val = Integer.valueOf(value.toString());
+    		return val;
     	}catch(Exception e) {
-    		log.error("数据转换异常【key：" + key + ", value：" + get(key) + "】", e);
+    		logger.warn("数据转换异常【key：" + key + ", value：" + get(key) + "】", e);
     		return null;
     	}
     }
     
     public Double getDouble(String key) {
     	try {
-    		Object value = get(key);
-    		if(value instanceof BigDecimal){
-    			return ((BigDecimal)value).doubleValue();
-    		}else if(value instanceof Double){
-    			return (Double)value;
-    		}else if(value instanceof String){
-    			try {
-    				return Double.valueOf((String)value);
-    			} catch (Exception e) {
-    				return null;
-    			}
-    		}
-    		return null;
+    		BigDecimal value= ((BigDecimal)(get(key)));
+    		return value == null?null:value.doubleValue();
     	}catch(Exception e) {
-    		log.error("数据转换异常【key：" + key + ", value：" + get(key) + "】", e);
+    		logger.warn("数据转换异常【key：" + key + ", value：" + get(key) + "】", e);
     		return null;
     	}
     }
@@ -132,7 +85,7 @@ public class DataRecord extends HashMap<String, Object> implements Serializable 
     	try{
     		return (Date)(get(key));
     	}catch(ClassCastException e) {
-    		log.error("数据转换异常【key：" + key + ", value：" + get(key) + "】", e);
+    		logger.warn("数据转换异常【key：" + key + ", value：" + get(key) + "】", e);
     		return null;
     	}
     }
@@ -144,7 +97,7 @@ public class DataRecord extends HashMap<String, Object> implements Serializable 
      * @return
      */
     public String getDateString(String key, String format) {
-    	Date value = getDate(key);
+    	Date value = getDate(key);;
     	if(value == null) {
     		return null;
     	}else if(format != null && !"".equals(format)) {
@@ -154,7 +107,7 @@ public class DataRecord extends HashMap<String, Object> implements Serializable 
     		DateFormat sdf = new SimpleDateFormat(format);
         	return sdf.format(value);
     	}catch(Exception e){
-    		log.error("数据转换异常【key：" + key + ", value：" + get(key) + "】", e);
+    		logger.warn("数据转换异常【key：" + key + ", value：" + get(key) + "】", e);
     		return null;
     	}
     }
@@ -176,16 +129,6 @@ public class DataRecord extends HashMap<String, Object> implements Serializable 
 
     public Object put(String key, Object value) {
     	return super.put(key, value);
-    }
-    
-    public boolean isEmpty(String key) {
-    	try{
-    		Object value = get(key);
-    		return value == null || value.toString().equals("");
-    	}catch(ClassCastException e) {
-    		log.error("数据转换异常【key：" + key + ", value：" + get(key) + "】", e);
-    		return false;
-    	}
     }
     
 }

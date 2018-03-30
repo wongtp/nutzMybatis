@@ -44,63 +44,32 @@ public class MapperReloader implements ServletContextListener, Runnable {
 	private static SqlSessionFactory sqlSessionFactory;
 	private static SqlSessionFactoryBean sqlSessionFactoryBean;
 	private static String[] mappers = ResourceUtil.getMappers(); 
-	private static WatchService watcher = null;
-	private static WatchKey key = null;
-	private static boolean isWatcher = true;
 	
     @Override  
     public void contextInitialized(ServletContextEvent sce) {
-    	//判断在 debug 模式下才做重新加载 mapper 文件的操作
-    	if (isDebug()) {
-    		isWatcher = true;
-    		//新开一条线程，而不至于阻塞
+    	if (isDebug()) {//判断在 debug 模式下才做重新加载 mapper 文件的操作
     		Thread thread = new Thread(new MapperReloader());
     		thread.start();
-    		sce.getServletContext().setAttribute("currentThread", thread);
 		}
-    }
-    
-    /**
-     * 如果不写的话貌似在 tomcat 自动重启的时候会销毁不了而报错
-     */
-    @Override  
-    public void contextDestroyed(ServletContextEvent sce) {
-    	isWatcher = false;
-    	if(key != null ) {
-    		key.cancel();
-    	}
-    	if(watcher != null ) {
-    		try {
-    			watcher.poll();
-    			watcher.close();
-    		} catch (IOException e) {
-    			e.printStackTrace();
-    		}
-    	}
-    	Thread thread = (Thread) sce.getServletContext().getAttribute("currentThread");
-    	thread.interrupt();
     }
     
 	@Override
 	public void run() {
-		//获取所有以 -mapper.xml 结尾文件的目录
 		List<String> mapperDirs = ResourceUtil.getMapperDirs();
 		if (mapperDirs != null && mapperDirs.size() > 0) {
+			WatchService watcher = null;
 			try {
-				//开启一个文件监视器
 				watcher = FileSystems.getDefault().newWatchService();
-				//把所有要监控的目录都注册进来
 				for (String dir : mapperDirs) {
 					System.out.println("监控mapper目录：" + dir);
 					Paths.get(dir).register(watcher, StandardWatchEventKinds.ENTRY_MODIFY);
 				}
 				long formerly = 0;
-				while (isWatcher) {  
-					key = watcher.take();
+				while (true) {  
+					WatchKey key = watcher.take();
 					for (WatchEvent<?> event: key.pollEvents()) {  
 		                long current = System.currentTimeMillis();
-		                //10秒内防止重复加载 mapper 文件，因为这个监视器会跳出来两次文件被修改的信号； 同样这些目录都是只监控文件的修改就行了，创建和删除好像没必要
-		                if (current - formerly > 10000 && "ENTRY_MODIFY".equals(event.kind().toString())) {
+		                if (current - formerly > 10000 && "ENTRY_MODIFY".equals(event.kind().toString())) {//10秒中之内不重复 load mapper 文件
 		                	try {
 		                		reloadXML(event.context().toString());
 		                	} catch (Exception e1) {
@@ -119,10 +88,6 @@ public class MapperReloader implements ServletContextListener, Runnable {
 		}
 	}
 	
-	/**
-	 * 判断是否在 debug 状态，如果不这样写的话可以另外写个配置文件
-	 * @return
-	 */
 	private boolean isDebug() {
 		List<String> args = ManagementFactory.getRuntimeMXBean().getInputArguments();
     	boolean isDebug = false;
@@ -138,7 +103,6 @@ public class MapperReloader implements ServletContextListener, Runnable {
 	public void reloadXML(String fileName) throws Exception {
         Configuration configuration = getSqlSessionFactory().getConfiguration();
         for (String resource : mappers) {
-        	//因为获取不到具体的路径，只有把所有同名的 mapper 文件都加载一遍了
         	if (resource.endsWith(fileName)) {
         		// 清理已加载的资源标识，方便让它重新加载。  
         		removeConfig(configuration, resource);
@@ -162,7 +126,7 @@ public class MapperReloader implements ServletContextListener, Runnable {
         Field field = classConfig.getDeclaredField("mappedStatements");
         field.setAccessible(true);
         Map<String, ?> map = (Map<String, ?>)field.get(configuration);
-        //手动解析mapper文件，把所有要移除的节点 ID 查出来
+        
         SAXReader reader = new SAXReader();
 		reader.setValidation(false);
 		reader.setEntityResolver(new IgnoreDTDEntityResolver());
@@ -185,6 +149,7 @@ public class MapperReloader implements ServletContextListener, Runnable {
 			}
 		}
         field.set(configuration, map);
+        //((Map<?, ?>)field.get(configuration)).clear();
     }
 	
     private void removeConfig(Configuration configuration, String resource) throws Exception {
@@ -199,12 +164,21 @@ public class MapperReloader implements ServletContextListener, Runnable {
         //clearMap(classConfig, configuration, "sqlFragments");
     }
     
+//	private void clearMap(Class<?> classConfig, Configuration configuration, String fieldName) throws Exception {
+//    	System.out.println("清除" + fieldName);
+//        Field field = classConfig.getDeclaredField(fieldName);
+//        field.setAccessible(true);
+//        ((Map<?, ?>)field.get(configuration)).clear();
+//    }
+    
     private void clearSet(Class<?> classConfig, Configuration configuration, String fieldName, String resource) throws Exception {
     	System.out.println("清除loadedResources");
         Field field = classConfig.getDeclaredField(fieldName);
         field.setAccessible(true);
         Set<?> set = (Set<?>) field.get(configuration);
+        //清除单个，并不是清除所有
         set.remove(resource);
+        //((Set<?>) field.get(configuration)).clear();
     }
     
     /**
