@@ -90,67 +90,75 @@ public interface BaseDao {
 	/**
 	 * 删除数据
 	 * @param statement ： mapper语句id
+	 * @param session ：可为空，为空时单个方法自动开启 session 并提交，不为空时方便外部开启 session 后执行多次操作
 	 * @return
 	 */
-	Integer delete(String statement);
+	Integer delete(String statement, SqlSession session);
 	
 	/**
 	 * 删除数据
 	 * @param statement ： mapper语句id
 	 * @param parameters ：where参数
+	 * @param session ：可为空，为空时单个方法自动开启 session 并提交，不为空时方便外部开启 session 后执行多次操作
 	 * @return
 	 */
-	Integer delete(String statement, Object parameters);
+	Integer delete(String statement, Object parameters, SqlSession session);
 
 	/**
 	 * 删除数据
 	 * @param tableName ：表名
 	 * @param primaryKey ：主键名称
 	 * @param primaryKeyValue ：主键值
+	 * @param session ：可为空，为空时单个方法自动开启 session 并提交，不为空时方便外部开启 session 后执行多次操作
 	 * @return
 	 */
-	Integer delete(String tableName, String primaryKey, Serializable primaryKeyValue);
+	Integer delete(String tableName, String primaryKey, Serializable primaryKeyValue, SqlSession session);
 	 
 	/**
 	 * 批量删除数据
 	 * @param tableName ：表名
 	 * @param primaryColumn ：主键名称
 	 * @param primaryKeyValues ：主键值，多个用逗号隔开
+	 * @param session ：可为空，为空时单个方法自动开启 session 并提交，不为空时方便外部开启 session 后执行多次操作
 	 * @return
 	 */
-	Integer deletes(String tableName, String primaryKey, String primaryKeyValues);
+	Integer deletes(String tableName, String primaryKey, String primaryKeyValues, SqlSession session);
 	
 	/**
 	 * 批量删除数据
 	 * @param tableName ：表名
 	 * @param parameters ：where参数
+	 * @param session ：可为空，为空时单个方法自动开启 session 并提交，不为空时方便外部开启 session 后执行多次操作
 	 * @return
 	 */
-	Integer deletes(String tableName, Object parameters);
+	Integer deletes(String tableName, Object parameters, SqlSession session);
 	
 	/**
 	 * 更新数据
 	 * @param statement ： mapper语句id
+	 * @param session ：可为空，为空时单个方法自动开启 session 并提交，不为空时方便外部开启 session 后执行多次操作
 	 * @return
 	 */
-	Integer update(String statement);
+	Integer update(String statement, SqlSession session);
 	
 	/**
 	 * 更新数据
 	 * @param statement ： mapper语句id
 	 * @param parameters ：where参数
+	 * @param session ：可为空，为空时单个方法自动开启 session 并提交，不为空时方便外部开启 session 后执行多次操作
 	 * @return
 	 */
-	Integer update(String statement, Object parameters);
+	Integer update(String statement, Object parameters, SqlSession session);
 	
 	/**
 	 * 更新数据
 	 * @param tableName ：表名
 	 * @param dataRecord ：要更新到数据库的dataRecord记录
 	 * @param parameters ：where参数
+	 * @param session ：可为空，为空时单个方法自动开启 session 并提交，不为空时方便外部开启 session 后执行多次操作
 	 * @return
 	 */
-	Integer update(String tableName, DataRecord dataRecord, Map<String, Object> parameters);
+	Integer update(String tableName, DataRecord dataRecord, Map<String, Object> parameters, SqlSession session);
 	
 	/**
 	 * 更新数据
@@ -158,40 +166,45 @@ public interface BaseDao {
 	 * @param primaryKey ：主键名称
 	 * @param primaryKeyValue ：主键值
 	 * @param dataRecord ：要更新到数据库的dataRecord记录
+	 * @param session ：可为空，为空时单个方法自动开启 session 并提交，不为空时方便外部开启 session 后执行多次操作
 	 * @return
 	 */
-	Integer update(String tableName, String primaryKey, Serializable primaryKeyValue, DataRecord dataRecord);
+	Integer update(String tableName, String primaryKey, Serializable primaryKeyValue, DataRecord dataRecord, SqlSession session);
 	
 	/**
 	 * 插入数据
 	 * @param statement ： mapper语句id
+	 * @param session ：可为空，为空时单个方法自动开启 session 并提交，不为空时方便外部开启 session 后执行多次操作
 	 * @return
 	 */
-	Integer insert(String statement);
+	Integer insert(String statement, SqlSession session);
 	
 	/**
 	 * 插入数据
 	 * @param tableName ：表名
 	 * @param dataRecord ：要插入到数据库的dataRecord记录
+	 * @param session ：可为空，为空时单个方法自动开启 session 并提交，不为空时方便外部开启 session 后执行多次操作
 	 * @return
 	 */
-	Integer insert(String tableName, DataRecord dataRecord);
+	Integer insert(String tableName, DataRecord dataRecord, SqlSession session);
 	
 	/**
 	 * 插入数据
 	 * @param statement ： mapper语句id
 	 * @param parameters  ：where参数
+	 * @param session ：可为空，为空时单个方法自动开启 session 并提交，不为空时方便外部开启 session 后执行多次操作
 	 * @return
 	 */
-	Integer insert(String statement, Object parameters);
+	Integer insert(String statement, Object parameters, SqlSession session);
 	
 	/**
 	 * 批量插入，里面不会对参数进行检验了，底层都是直接拼参数的，要防止 sql 注入的话请提前做好处理
 	 * @param lsit ：数据集
 	 * @param tableName ：表名
+	 * @param session ：可为空，为空时单个方法自动开启 session 并提交，不为空时方便外部开启 session 后执行多次操作
 	 * @return
 	 */
-	Integer insertList(List<DataRecord> list, String tableName);
+	Integer insertList(List<DataRecord> list, String tableName, SqlSession session);
 
 	/**
 	 * 获取记录数
@@ -208,9 +221,4 @@ public interface BaseDao {
 	 */
 	SqlSession getSession();
 
-	/**
-	 * @return
-	 */
-	void closeSession();
-	
 }

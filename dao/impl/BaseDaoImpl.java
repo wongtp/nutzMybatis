@@ -121,90 +121,100 @@ public class BaseDaoImpl extends SqlSessionFactoryBean implements BaseDao {
 	}
 
 	@Override
-	public Integer delete(String statement) {
-		return this.delete(statement, null);
+	public Integer delete(String statement, SqlSession session) {
+		return this.delete(statement, null, session);
 	}
 
 	@Override
-	public Integer delete(String statement, Object parameters) {
+	public Integer delete(String statement, Object parameters, SqlSession session) {
 		Integer obj = null;
-		SqlSession session = getSqlSessionFactory().openSession();
-		try {
-			obj = session.delete(statement, parameters);
-		} catch (Exception e) {
-			e.printStackTrace();
-			log.error(e);
-		} finally {
-			if (log.isDebugEnabled()) {
-				BoundSql sqlLog = session.getConfiguration().getMappedStatement(statement).getBoundSql(parameters);
-				log.debug("\n执行sql:" + sqlLog.getSql());
-				log.debug("\n参数集合:" + sqlLog.getParameterObject());
-				log.debug("\n结果集:" + obj);
+		if (session == null) {
+			session = getSqlSessionFactory().openSession();
+			try {
+				obj = session.delete(statement, parameters);
+				session.commit();
+			} catch (Exception e) {
+				session.rollback();
+				e.printStackTrace();
+				log.error(e);
+			} finally {
+				if (log.isDebugEnabled()) {
+					BoundSql sqlLog = session.getConfiguration().getMappedStatement(statement).getBoundSql(parameters);
+					log.debug("\n执行sql:" + sqlLog.getSql());
+					log.debug("\n参数集合:" + sqlLog.getParameterObject());
+					log.debug("\n结果集:" + obj);
+				}
+				session.close();
 			}
-			session.close();
+		}else {
+			obj = session.delete(statement, parameters);
 		}
 		return obj;
 	}
 
 	@Override
-	public Integer delete(String tableName, String primaryKey, Serializable primaryKeyValue) {
+	public Integer delete(String tableName, String primaryKey, Serializable primaryKeyValue, SqlSession session) {
 		Map<String, Object> param = new HashMap<>();
 		param.put("TABLE_NAME", tableName);
 		param.put("PRIMARY_KEY", primaryKey);
 		param.put("PRIMARY_KEY_VALUE", primaryKeyValue);
 		String statement = "com.wong.base.delete";
-		return this.delete(statement, param);
+		return this.delete(statement, param, session);
 	}
 
 	@Override
-	public Integer deletes(String tableName, String primaryKey, String primaryKeyValues) {
+	public Integer deletes(String tableName, String primaryKey, String primaryKeyValues, SqlSession session) {
 		Map<String, Object> param = new HashMap<>();
 		param.put("TABLE_NAME", tableName);
 		param.put("PRIMARY_KEY", primaryKey);
 		param.put("PRIMARY_KEY_VALUE", primaryKeyValues);
 		String statement = "com.wong.base.deleteByIDs";
-		return this.delete(statement, param);
+		return this.delete(statement, param, session);
 	}
 	
 	@Override
-	public Integer deletes(String tableName, Object parameters) {
+	public Integer deletes(String tableName, Object parameters, SqlSession session) {
 		Map<String, Object> param = new HashMap<>();
 		param.put("TABLE_NAME", tableName);
 		param.put("PARAMETERS", parameters);
 		String statement = "com.wong.base.deleteByParam";
-		return this.delete(statement, param);
+		return this.delete(statement, param, session);
 	}
 
 	@Override
-	public Integer update(String statement) {
-		return this.update(statement, null);
+	public Integer update(String statement, SqlSession session) {
+		return this.update(statement, null, session);
 	}
 
 	@Override
-	public Integer update(String statement, Object parameters) {
+	public Integer update(String statement, Object parameters, SqlSession session) {
 		Integer obj = null;
-		SqlSession session = getSqlSessionFactory().openSession();
-		try {
-			obj = session.update(statement, parameters);
-			session.commit();
-		} catch (Exception e) {
-			session.rollback();
-			e.printStackTrace();
-			log.error(e);
-		} finally {
-			if (log.isDebugEnabled()) {
-				BoundSql sqlLog = session.getConfiguration().getMappedStatement(statement).getBoundSql(parameters);
-				log.debug("\n执行sql:" + sqlLog.getSql());
-				log.debug("\n参数集合:" + sqlLog.getParameterObject());
-				log.debug("\n结果集:" + obj);
+		if (session == null) {
+			session = getSqlSessionFactory().openSession();
+			try {
+				obj = session.update(statement, parameters);
+				session.commit();
+			} catch (Exception e) {
+				session.rollback();
+				e.printStackTrace();
+				log.error(e);
+			} finally {
+				if (log.isDebugEnabled()) {
+					BoundSql sqlLog = session.getConfiguration().getMappedStatement(statement).getBoundSql(parameters);
+					log.debug("\n执行sql:" + sqlLog.getSql());
+					log.debug("\n参数集合:" + sqlLog.getParameterObject());
+					log.debug("\n结果集:" + obj);
+				}
+				session.close();
 			}
-			session.close();
+		}else {
+			obj = session.update(statement, parameters);
 		}
 		return obj;
 	}
 
 	@Override
-	public Integer update(String tableName, DataRecord record, Map<String, Object> parameters) {
+	public Integer update(String tableName, DataRecord record, Map<String, Object> parameters, SqlSession session) {
 		if (record == null || parameters == null || parameters.isEmpty()) {
 			return 0;
 		}
@@ -249,41 +259,23 @@ public class BaseDaoImpl extends SqlSessionFactoryBean implements BaseDao {
 		updateParams.put("WHERE_STATEMENT", whereStatement.toString());
 		updateParams.putAll(values);
 		String statement = "com.wong.base.update";
-		return this.update(statement, updateParams);
+		return this.update(statement, updateParams, session);
 	}
 
 	@Override
-	public Integer update(String tableName, String primaryKey, Serializable primaryKeyValue, DataRecord record) {
+	public Integer update(String tableName, String primaryKey, Serializable primaryKeyValue, DataRecord record, SqlSession session) {
 		Map<String, Object> param = new HashMap<>();
 		param.put(primaryKey, primaryKeyValue);
-		return this.update(tableName, record,  param);
+		return this.update(tableName, record,  param, session);
 	}
 
 	@Override
-	public Integer insert(String statement) {
-		Integer obj = null;
-		SqlSession session = getSqlSessionFactory().openSession();
-		try {
-			obj = session.insert(statement, null);
-			session.commit();
-		} catch (Exception e) {
-			session.rollback();
-			e.printStackTrace();
-			log.error(e);
-		} finally {
-			if (log.isDebugEnabled()) {
-				BoundSql sqlLog = session.getConfiguration().getMappedStatement(statement).getBoundSql(null);
-				log.debug("\n执行sql:" + sqlLog.getSql());
-				log.debug("\n参数集合:" + sqlLog.getParameterObject());
-				log.debug("\n结果集：" + obj);
-			}
-			session.close();
-		}
-		return obj;
+	public Integer insert(String statement, SqlSession session) {
+		return this.insert(statement, null, session);
 	}
 
 	@Override
-	public Integer insert(String tableName, DataRecord record) {
+	public Integer insert(String tableName, DataRecord record, SqlSession session) {
 		if (record == null) {
 			return 0;
 		}
@@ -319,34 +311,38 @@ public class BaseDaoImpl extends SqlSessionFactoryBean implements BaseDao {
 		parameters.put("VALUES", valueStatement.toString());
 		parameters.putAll(values);
 		String statement = "com.wong.base.insert";
-		return this.insert(statement, parameters);
+		return this.insert(statement, parameters, session);
 	}
 
 	@Override
-	public Integer insert(String statement, Object parameters) {
+	public Integer insert(String statement, Object parameters, SqlSession session) {
 		Integer obj = null;
-		SqlSession session = getSqlSessionFactory().openSession();
-		try {
-			obj = session.insert(statement, parameters);
-			session.commit();
-		} catch (Exception e) {
-			session.rollback();
-			e.printStackTrace();
-			log.error(e);
-		} finally {
-			if (log.isDebugEnabled()) {
-				BoundSql sqlLog = session.getConfiguration().getMappedStatement(statement).getBoundSql(parameters);
-				log.debug("\n执行sql:" + sqlLog.getSql());
-				log.debug("\n参数集合:" + sqlLog.getParameterObject());
-				log.debug("\n结果集：" + obj);
+		if (session == null) {
+			session = getSqlSessionFactory().openSession();
+			try {
+				obj = session.insert(statement, parameters);
+				session.commit();
+			} catch (Exception e) {
+				session.rollback();
+				e.printStackTrace();
+				log.error(e);
+			} finally {
+				if (log.isDebugEnabled()) {
+					BoundSql sqlLog = session.getConfiguration().getMappedStatement(statement).getBoundSql(parameters);
+					log.debug("\n执行sql:" + sqlLog.getSql());
+					log.debug("\n参数集合:" + sqlLog.getParameterObject());
+					log.debug("\n结果集：" + obj);
+				}
+				session.close();
 			}
-			session.close();
+		}else {
+			obj = session.insert(statement, parameters);
 		}
 		return obj;
 	}
 
 	@Override
-	public Integer insertList(List<DataRecord> dataList, String tableName) {
+	public Integer insertList(List<DataRecord> dataList, String tableName, SqlSession session) {
 		Map<String, Object> param = new HashMap<>();
 		param.put("TABLE_NAME", tableName);
 		param.put("DATA_LIST", dataList);
@@ -383,7 +379,7 @@ public class BaseDaoImpl extends SqlSessionFactoryBean implements BaseDao {
 			tempList.add(dataList.get(i));
 			if((i+1) % 500 == 0 || i == dataList.size() - 1) {
 				parameters.put("LIST", tempList);
-				count+= this.insert(statement, parameters);
+				count+= this.insert(statement, parameters, session);
 				tempList.clear();
 			}
 		}
@@ -399,11 +395,6 @@ public class BaseDaoImpl extends SqlSessionFactoryBean implements BaseDao {
 		return this.getLong(statement, param);
 	}
 	
-	@Override
-	public void closeSession() {
-		getSession().close();
-	}
-
 	@Override
 	public SqlSession getSession() {
 		if (sqlSession == null) {
