@@ -20,6 +20,7 @@
 	<select id="getCount" resultType="java.lang.Long">
 		SELECT count(0) FROM ${TABLE_NAME} t where 1 = 1
 		<if test="PARAMETERS != null">
+			and 
 			<foreach collection="PARAMETERS" index="key"  item="value" separator=" and " >
 	        	${key} = #{value} 
 		    </foreach>
@@ -37,9 +38,12 @@
 	<delete id="deleteByParam" parameterType="Map">
 		<if test="PARAMETERS != null and TABLE_NAME!=null and TABLE_NAME != '' ">
 			delete from ${TABLE_NAME} WHERE 1 = 1
-			<foreach collection="PARAMETERS" index="key"  item="value" separator=" and " >
-	        	${key} = #{value}
-		    </foreach>
+			<if test="PARAMETERS != null">
+				and 
+				<foreach collection="PARAMETERS" index="key"  item="value" separator=" and " >
+		        	${key} = #{value} 
+			    </foreach>
+			</if>
 	    </if>
 	</delete>
 	
@@ -52,9 +56,11 @@
 	</insert>
 	
 	<insert id="insertList" parameterType="Map">
-		insert into ${TABLENAME_STATEMENT}(${COLUMNS_STATEMENT})
-		<foreach collection="LIST" item="item" separator="union">
-			select ${ITEM_STATEMENT} from dual
-		</foreach>
+		insert into ${TABLENAME}(${COLUMNS})
+		<if test="LIST != null">
+			<foreach collection="LIST" item="item" separator=" union ">
+				select ${ITEMS} from dual
+			</foreach>
+		</if>
 	</insert>
 </mapper>

@@ -1,6 +1,7 @@
 package cn.wizzer.app.wb.modules.common.nutzMybatis.dao.impl;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -48,6 +49,7 @@ public class BaseDaoImpl extends SqlSessionFactoryBean implements BaseDao {
 			obj = session.selectOne(statement, parameters);
 		} catch (Exception e) {
 			e.printStackTrace();
+			log.error(e);
 		} finally {
 			if (log.isDebugEnabled()) {
 				BoundSql sqlLog = session.getConfiguration().getMappedStatement(statement).getBoundSql(parameters);
@@ -93,6 +95,7 @@ public class BaseDaoImpl extends SqlSessionFactoryBean implements BaseDao {
 			obj = session.selectList(statement, parameters);
 		} catch (Exception e) {
 			e.printStackTrace();
+			log.error(e);
 		} finally {
 			if (log.isDebugEnabled()) {
 				BoundSql sqlLog = session.getConfiguration().getMappedStatement(statement).getBoundSql(parameters);
@@ -130,6 +133,7 @@ public class BaseDaoImpl extends SqlSessionFactoryBean implements BaseDao {
 			obj = session.delete(statement, parameters);
 		} catch (Exception e) {
 			e.printStackTrace();
+			log.error(e);
 		} finally {
 			if (log.isDebugEnabled()) {
 				BoundSql sqlLog = session.getConfiguration().getMappedStatement(statement).getBoundSql(parameters);
@@ -186,6 +190,7 @@ public class BaseDaoImpl extends SqlSessionFactoryBean implements BaseDao {
 		} catch (Exception e) {
 			session.rollback();
 			e.printStackTrace();
+			log.error(e);
 		} finally {
 			if (log.isDebugEnabled()) {
 				BoundSql sqlLog = session.getConfiguration().getMappedStatement(statement).getBoundSql(parameters);
@@ -264,6 +269,7 @@ public class BaseDaoImpl extends SqlSessionFactoryBean implements BaseDao {
 		} catch (Exception e) {
 			session.rollback();
 			e.printStackTrace();
+			log.error(e);
 		} finally {
 			if (log.isDebugEnabled()) {
 				BoundSql sqlLog = session.getConfiguration().getMappedStatement(statement).getBoundSql(null);
@@ -326,6 +332,7 @@ public class BaseDaoImpl extends SqlSessionFactoryBean implements BaseDao {
 		} catch (Exception e) {
 			session.rollback();
 			e.printStackTrace();
+			log.error(e);
 		} finally {
 			if (log.isDebugEnabled()) {
 				BoundSql sqlLog = session.getConfiguration().getMappedStatement(statement).getBoundSql(parameters);
@@ -343,8 +350,44 @@ public class BaseDaoImpl extends SqlSessionFactoryBean implements BaseDao {
 		Map<String, Object> param = new HashMap<>();
 		param.put("TABLE_NAME", tableName);
 		param.put("DATA_LIST", dataList);
-		String statement = "com.wong.base.instList";
-		return this.insert(statement, param);
+		String statement = "com.wong.base.insertList";
+		
+		if(dataList.isEmpty()){
+			return 0;
+		}
+		Set<String> columnSet = dataList.get(0).keySet();
+		
+		StringBuffer insertColumn = new StringBuffer(); 
+		StringBuffer pramaColumn = new StringBuffer();
+		
+		for (String column : columnSet) {
+			insertColumn.append(column);
+			insertColumn.append(',');
+			pramaColumn.append("#{item.");
+			pramaColumn.append(column);
+			pramaColumn.append('}');
+			pramaColumn.append(',');
+		}
+		insertColumn.deleteCharAt(insertColumn.length()-1);
+		pramaColumn.deleteCharAt(pramaColumn.length()-1);
+		
+		Map<String, Object> parameters = new HashMap<String, Object>();
+		parameters.put("TABLENAME", tableName);
+		parameters.put("COLUMNS", insertColumn);
+		parameters.put("ITEMS", pramaColumn);
+		
+		int count=0;
+		//500条执行一次，避免sql语句过长，导致无法执行
+		List<DataRecord> tempList = new ArrayList<DataRecord>();
+		for (int i = 0; i < dataList.size(); i++) {
+			tempList.add(dataList.get(i));
+			if((i+1) % 500 == 0 || i == dataList.size() - 1) {
+				parameters.put("LIST", tempList);
+				count+= this.insert(statement, parameters);
+				tempList.clear();
+			}
+		}
+		return count;
 	}
 
 	@Override

@@ -50,8 +50,10 @@ public class SqlSessionFactoryBean {
 	private String dataSourcePropsLocatetion = "nutzMybatisDB.properties";
 	
 	private DataSource dataSource;
+	
+	private DruidDataSource druidDataSource = new DruidDataSource();
 	 
-	private DatabaseIdProvider databaseIdProvider;
+	private DatabaseIdProvider databaseIdProvider = new VendorDatabaseIdProvider();
 	
 	private TransactionFactory transactionFactory = new JdbcTransactionFactory();
 
@@ -275,14 +277,14 @@ public class SqlSessionFactoryBean {
 	    		if (log.isDebugEnabled()) {
 	    			log.debug("Registered type handler: '" + typeHandler + "'");
 	    		}
-	      }
+	    	}
 	    }
 	    
 	    if (this.dataSource == null) {
 	    	if (this.dataSourcePropsLocatetion != null) {
 				//synchronized (this) {
 					//if (dataSource == null) {
-						DruidDataSource druidDataSource = new DruidDataSource();//默认使用 DruidDataSource
+						//DruidDataSource druidDataSource = new DruidDataSource();//默认使用 DruidDataSource
 						Properties dataSourceProps = Resources.getResourceAsProperties(dataSourcePropsLocatetion);
 						druidDataSource.configFromPropety(dataSourceProps);
 						druidDataSource.setDriverClassName(dataSourceProps.getProperty("druid.driverClassName"));
@@ -291,7 +293,6 @@ public class SqlSessionFactoryBean {
 						druidDataSource.setPassword(dataSourceProps.getProperty("druid.password"));
 						druidDataSource.setRemoveAbandonedTimeout(Integer.valueOf(dataSourceProps.getProperty("druid.removeAbandonedTimeout")));
 						druidDataSource.setRemoveAbandoned(Boolean.valueOf(dataSourceProps.getProperty("druid.removeAbandoned")));
-						this.databaseIdProvider = new VendorDatabaseIdProvider();
 						this.databaseIdProvider.setProperties(dataSourceProps);
 						try {
 							druidDataSource.init();
