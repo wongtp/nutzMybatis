@@ -21,7 +21,6 @@ import cn.wizzer.app.wb.modules.common.nutzMybatis.dto.DataRecord;
 public class BaseDaoImpl extends SqlSessionFactoryBean implements BaseDao {
 	
 	private static final Log log = Logs.get();
-	private SqlSession sqlSession;
 	
 	@Override
 	public Integer getInt(String statement, Object parameters) {
@@ -44,7 +43,7 @@ public class BaseDaoImpl extends SqlSessionFactoryBean implements BaseDao {
 	@Override
 	public <T> T getObject(String statement, Object parameters) {
 		T obj = null;
-		SqlSession session = getSqlSessionFactory().openSession();
+		SqlSession session = getSqlSessionFactory().openSession(true);
 		try {
 			obj = session.selectOne(statement, parameters);
 		} catch (Exception e) {
@@ -90,7 +89,7 @@ public class BaseDaoImpl extends SqlSessionFactoryBean implements BaseDao {
 	@Override
 	public <E> List<E> getList(String statement, Object parameters) {
 		List<E> obj = null;
-		SqlSession session = getSqlSessionFactory().openSession();
+		SqlSession session = getSqlSessionFactory().openSession(true);
 		try {
 			obj = session.selectList(statement, parameters);
 		} catch (Exception e) {
@@ -129,7 +128,7 @@ public class BaseDaoImpl extends SqlSessionFactoryBean implements BaseDao {
 	public Integer delete(String statement, Object parameters, SqlSession session) {
 		Integer obj = null;
 		if (session == null) {
-			session = getSqlSessionFactory().openSession();
+			session = getSession();
 			try {
 				obj = session.delete(statement, parameters);
 				session.commit();
@@ -190,7 +189,7 @@ public class BaseDaoImpl extends SqlSessionFactoryBean implements BaseDao {
 	public Integer update(String statement, Object parameters, SqlSession session) {
 		Integer obj = null;
 		if (session == null) {
-			session = getSqlSessionFactory().openSession();
+			session = getSession();
 			try {
 				obj = session.update(statement, parameters);
 				session.commit();
@@ -318,7 +317,7 @@ public class BaseDaoImpl extends SqlSessionFactoryBean implements BaseDao {
 	public Integer insert(String statement, Object parameters, SqlSession session) {
 		Integer obj = null;
 		if (session == null) {
-			session = getSqlSessionFactory().openSession();
+			session = getSession();
 			try {
 				obj = session.insert(statement, parameters);
 				session.commit();
@@ -397,10 +396,7 @@ public class BaseDaoImpl extends SqlSessionFactoryBean implements BaseDao {
 	
 	@Override
 	public SqlSession getSession() {
-		if (sqlSession == null) {
-			sqlSession = getSqlSessionFactory().openSession();
-		}
-		return sqlSession;
+		return getSqlSessionFactory().openSession(false);
 	}
 
 }
