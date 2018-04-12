@@ -2,45 +2,45 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-Mapper.dtd">
 <mapper namespace="com.wong.base">
 	<select id="getDataRecord" resultType="dataRecord">
-		SELECT * FROM ${TABLE_NAME} t
+		SELECT * FROM ${tableName} t
 		where 1 = 1
-		and ${PRIMARY_KEY} = #{PRIMARY_KEY_VALUE}
+		and ${primaryKey} = #{primaryKeyValue}
 	</select>
 	
 	<select id="getTableList" resultType="dataRecord">
-		SELECT * FROM ${TABLE_NAME} t
+		SELECT * FROM ${tableName} t
 		where 1 = 1
-		<if test="PARAMETERS != null">
-			<foreach collection="PARAMETERS" index="key"  item="value" separator=" and " >
+		<if test="parameters != null">
+			<foreach collection="parameters" index="key"  item="value" separator=" and " >
 	        	${key} = #{value}
 		    </foreach>
 		</if>
 	</select>
 	
 	<select id="getCount" resultType="java.lang.Long">
-		SELECT count(0) FROM ${TABLE_NAME} t where 1 = 1
-		<if test="PARAMETERS != null">
+		SELECT count(0) FROM ${tableName} t where 1 = 1
+		<if test="parameters != null">
 			and 
-			<foreach collection="PARAMETERS" index="key"  item="value" separator=" and " >
+			<foreach collection="parameters" index="key"  item="value" separator=" and " >
 	        	${key} = #{value} 
 		    </foreach>
 		</if>
 	</select>
 	
 	<delete id="delete" parameterType="Map">
-		delete from ${TABLE_NAME} WHERE ${PRIMARY_KEY} = #{PRIMARY_KEY_VALUE}
+		delete from ${tableName} WHERE ${primaryKey} = #{primaryKeyValue}
 	</delete>
 	
-	<delete id="deleteByIDs" parameterType="Map">
-		delete from ${TABLE_NAME} WHERE ${PRIMARY_KEY} in (${PRIMARY_KEY_VALUE})
+	<delete id="deleteByIds" parameterType="Map">
+		delete from ${tableName} WHERE ${primaryKey} in (${primaryKeyValues})
 	</delete>
 	
 	<delete id="deleteByParam" parameterType="Map">
-		<if test="PARAMETERS != null and TABLE_NAME!=null and TABLE_NAME != '' ">
-			delete from ${TABLE_NAME} WHERE 1 = 1
-			<if test="PARAMETERS != null">
+		<if test="parameters != null and tableName!=null and tableName != '' ">
+			delete from ${tableName} WHERE 1 = 1
+			<if test="parameters != null">
 				and 
-				<foreach collection="PARAMETERS" index="key"  item="value" separator=" and " >
+				<foreach collection="parameters" index="key"  item="value" separator=" and " >
 		        	${key} = #{value} 
 			    </foreach>
 			</if>
@@ -48,18 +48,18 @@
 	</delete>
 	
 	<update id="update" parameterType="Map">
-		update ${TABLENAME_STATEMENT} SET ${VALUES_STATEMENT} <if test="WHERE_STATEMENT != null and WHERE_STATEMENT != ''"> where ${WHERE_STATEMENT} </if> 
+		update ${tableName} SET ${values} <if test="where != null and where != ''"> where ${where} </if> 
 	</update>
 	
 	<insert id="insert" parameterType="Map">
-		insert into ${TABLE_NAME}(${COLUMNS}) values(${VALUES})
+		insert into ${tableName}(${columns}) values(${values})
 	</insert>
 	
 	<insert id="insertList" parameterType="Map">
-		insert into ${TABLENAME}(${COLUMNS})
-		<if test="LIST != null">
-			<foreach collection="LIST" item="item" separator=" union ">
-				select ${ITEMS} from dual
+		insert into ${tableName}(${columns})
+		<if test="list != null">
+			<foreach collection="list" item="item" separator=" union ">
+				select ${items} from dual
 			</foreach>
 		</if>
 	</insert>

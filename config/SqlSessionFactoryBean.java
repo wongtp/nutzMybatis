@@ -282,26 +282,24 @@ public class SqlSessionFactoryBean {
 	    
 	    if (this.dataSource == null) {
 	    	if (this.dataSourcePropsLocatetion != null) {
-				//synchronized (this) {
-					//if (dataSource == null) {
-						//DruidDataSource druidDataSource = new DruidDataSource();//默认使用 DruidDataSource
-						Properties dataSourceProps = Resources.getResourceAsProperties(dataSourcePropsLocatetion);
-						druidDataSource.configFromPropety(dataSourceProps);
-						druidDataSource.setDriverClassName(dataSourceProps.getProperty("druid.driverClassName"));
-						druidDataSource.setUrl(dataSourceProps.getProperty("druid.url"));
-						druidDataSource.setUsername(dataSourceProps.getProperty("druid.username"));
-						druidDataSource.setPassword(dataSourceProps.getProperty("druid.password"));
-						druidDataSource.setRemoveAbandonedTimeout(Integer.valueOf(dataSourceProps.getProperty("druid.removeAbandonedTimeout")));
-						druidDataSource.setRemoveAbandoned(Boolean.valueOf(dataSourceProps.getProperty("druid.removeAbandoned")));
-						this.databaseIdProvider.setProperties(dataSourceProps);
-						try {
-							druidDataSource.init();
-							this.dataSource = druidDataSource;
-						} catch (SQLException e) {
-							e.printStackTrace();
-						}
-					//}
-				//}
+				Properties dataSourceProps = Resources.getResourceAsProperties(dataSourcePropsLocatetion);
+				druidDataSource.setDriverClassName(dataSourceProps.getProperty("druid.driverClassName"));
+				druidDataSource.setUrl(dataSourceProps.getProperty("druid.url"));
+				druidDataSource.setUsername(dataSourceProps.getProperty("druid.username"));
+				druidDataSource.setPassword(dataSourceProps.getProperty("druid.password"));
+				druidDataSource.setRemoveAbandonedTimeout(Integer.valueOf(dataSourceProps.getProperty("druid.removeAbandonedTimeout")));
+				druidDataSource.setRemoveAbandoned(Boolean.valueOf(dataSourceProps.getProperty("druid.removeAbandoned")));
+				druidDataSource.setValidationQuery(dataSourceProps.getProperty("druid.validationQuery"));
+				druidDataSource.configFromPropety(dataSourceProps);
+				druidDataSource.setConnectProperties(dataSourceProps);
+				
+				this.databaseIdProvider.setProperties(dataSourceProps);
+				try {
+					druidDataSource.init();
+					this.dataSource = druidDataSource;
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
 			}else {
 				throw new IOException("dataSourcePropsLocatetion is null");
 			}
