@@ -67,6 +67,7 @@ public class MapperReloader implements ServletContextListener, Runnable {
     public void contextDestroyed(ServletContextEvent sce) {
     	isWatcher = false;
     	if(key != null ) {
+    		key.reset();
     		key.cancel();
     	}
     	if(watcher != null ) {
@@ -78,7 +79,9 @@ public class MapperReloader implements ServletContextListener, Runnable {
     		}
     	}
     	Thread thread = (Thread) sce.getServletContext().getAttribute("currentThread");
-    	thread.interrupt();
+    	if (thread != null) {
+    		thread.interrupt();
+		}
     }
     
 	@Override

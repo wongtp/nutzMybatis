@@ -53,12 +53,11 @@ public class BaseDaoImpl extends SqlSessionFactoryBean implements BaseDao {
 			e.printStackTrace();
 			log.error(e);
 		} finally {
-			if (log.isDebugEnabled()) {
-				BoundSql sqlLog = session.getConfiguration().getMappedStatement(statement).getBoundSql(parameters);
-				log.debug("\n执行sql:" + sqlLog.getSql());
-				log.debug("\n参数集:" + sqlLog.getParameterObject());
-				log.debug("\n返回结果：" + obj);
-			}
+			BoundSql sqlLog = session.getConfiguration().getMappedStatement(statement).getBoundSql(parameters);
+			log.debug("\n执行statement:" + statement);
+			log.debug("\n执行sql:" + sqlLog.getSql());
+			log.debug("\n参数集:" + sqlLog.getParameterObject());
+			log.debug("\n返回结果：" + obj);
 			session.close();
 		}
 		return obj;
@@ -99,14 +98,13 @@ public class BaseDaoImpl extends SqlSessionFactoryBean implements BaseDao {
 			e.printStackTrace();
 			log.error(e);
 		} finally {
-			if (log.isDebugEnabled()) {
-				BoundSql sqlLog = session.getConfiguration().getMappedStatement(statement).getBoundSql(parameters);
-				log.debug("\n执行sql:" + sqlLog.getSql());
-				log.debug("\n参数集:" + sqlLog.getParameterObject());
-				if (obj != null) {
-					for (E e : obj) {
-						log.debug("\n结果集:" + e);
-					}
+			BoundSql sqlLog = session.getConfiguration().getMappedStatement(statement).getBoundSql(parameters);
+			log.debug("\n执行statement:" + statement);
+			log.debug("\n执行sql:" + sqlLog.getSql());
+			log.debug("\n参数集:" + sqlLog.getParameterObject());
+			if (obj != null) {
+				for (E e : obj) {
+					log.debug("结果集:" + e);
 				}
 			}
 			session.close();
@@ -141,15 +139,15 @@ public class BaseDaoImpl extends SqlSessionFactoryBean implements BaseDao {
 				obj = session.delete(statement, parameters);
 				session.commit();
 			} catch (Exception e) {
+				log.error(e);
 				session.rollback();
 				throw new DaoException(e);
 			} finally {
-				if (log.isDebugEnabled()) {
-					BoundSql sqlLog = session.getConfiguration().getMappedStatement(statement).getBoundSql(parameters);
-					log.debug("\n执行sql:" + sqlLog.getSql());
-					log.debug("\n参数集:" + sqlLog.getParameterObject());
-					log.debug("\n结果集:" + obj);
-				}
+				BoundSql sqlLog = session.getConfiguration().getMappedStatement(statement).getBoundSql(parameters);
+				log.debug("\n执行statement:" + statement);
+				log.debug("\n执行sql:" + sqlLog.getSql());
+				log.debug("\n参数集:" + sqlLog.getParameterObject());
+				log.debug("\n结果集:" + obj);
 				session.close();
 			}
 		}else {
@@ -225,12 +223,11 @@ public class BaseDaoImpl extends SqlSessionFactoryBean implements BaseDao {
 				session.rollback();
 				throw new DaoException(e);
 			} finally {
-				if (log.isDebugEnabled()) {
-					BoundSql sqlLog = session.getConfiguration().getMappedStatement(statement).getBoundSql(parameters);
-					log.debug("\n执行sql:" + sqlLog.getSql());
-					log.debug("\n参数集:" + sqlLog.getParameterObject());
-					log.debug("\n结果集:" + obj);
-				}
+				BoundSql sqlLog = session.getConfiguration().getMappedStatement(statement).getBoundSql(parameters);
+				log.debug("\n执行statement:" + statement);
+				log.debug("\n执行sql:" + sqlLog.getSql());
+				log.debug("\n参数集:" + sqlLog.getParameterObject());
+				log.debug("\n结果集:" + obj);
 				session.close();
 			}
 		}else {
@@ -370,15 +367,15 @@ public class BaseDaoImpl extends SqlSessionFactoryBean implements BaseDao {
 				obj = session.insert(statement, parameters);
 				session.commit();
 			} catch (Exception e) {
+				log.error(e);
 				session.rollback();
 				throw new DaoException(e);
 			} finally {
-				if (log.isDebugEnabled()) {
-					BoundSql sqlLog = session.getConfiguration().getMappedStatement(statement).getBoundSql(parameters);
-					log.debug("\n执行sql:" + sqlLog.getSql());
-					log.debug("\n参数集:" + sqlLog.getParameterObject());
-					log.debug("\n结果集：" + obj);
-				}
+				BoundSql sqlLog = session.getConfiguration().getMappedStatement(statement).getBoundSql(parameters);
+				log.debug("\n执行statement:" + statement);
+				log.debug("\n执行sql:" + sqlLog.getSql());
+				log.debug("\n参数集:" + sqlLog.getParameterObject());
+				log.debug("\n结果集：" + obj);
 				session.close();
 			}
 		}else {

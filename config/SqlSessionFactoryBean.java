@@ -2,6 +2,7 @@ package cn.wizzer.app.wb.modules.common.nutzMybatis.config;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Properties;
+import java.util.Set;
 
 import javax.sql.DataSource;
 
@@ -23,9 +24,11 @@ import org.apache.ibatis.session.SqlSessionFactoryBuilder;
 import org.apache.ibatis.transaction.TransactionFactory;
 import org.apache.ibatis.transaction.jdbc.JdbcTransactionFactory;
 import org.apache.ibatis.type.TypeHandler;
-import org.nutz.ioc.loader.annotation.IocBean;
+import org.nutz.ioc.Ioc;
 import org.nutz.log.Log;
 import org.nutz.log.Logs;
+import org.nutz.mvc.Mvcs;
+import org.nutz.mvc.NutMvcContext;
 
 import com.alibaba.druid.pool.DruidDataSource;
 
@@ -36,7 +39,7 @@ import cn.wizzer.app.wb.modules.common.nutzMybatis.utils.StringUtil;
  * @author 黄小天 wongtp@outlook.com
  * @date 2018年2月11日 下午7:40:56
  */
-@IocBean(name="sqlSessionFactoryBean")
+//@IocBean(name="sqlSessionFactoryBean")
 public class SqlSessionFactoryBean {
 	
 	private static final Log log = Logs.get();
@@ -47,12 +50,8 @@ public class SqlSessionFactoryBean {
 
 	private String[] mapperLocations = ResourceUtil.getMappers();
 	
-	private String dataSourcePropsLocatetion = "nutzMybatisDB.properties";
-	
 	private DataSource dataSource;
 	
-	private DruidDataSource druidDataSource = new DruidDataSource();
-	 
 	private DatabaseIdProvider databaseIdProvider = new VendorDatabaseIdProvider();
 	
 	private TransactionFactory transactionFactory = new JdbcTransactionFactory();
@@ -85,8 +84,27 @@ public class SqlSessionFactoryBean {
 
 	private ObjectWrapperFactory objectWrapperFactory;
 	
-	public void setDataSourcePropsLocatetion(String dataSourcePropsLocatetion) {
-		this.dataSourcePropsLocatetion = dataSourcePropsLocatetion;
+	public SqlSessionFactoryBean() {
+		if (dataSource == null) {
+			Ioc ioc = Mvcs.getIoc();
+			if (ioc == null) {
+				NutMvcContext context = Mvcs.ctx();
+				Set<String> set = context.iocs.keySet();
+				for (String key : set) {
+					ioc = context.iocs.get(key);//就一个而已
+				}
+			}
+			if (ioc != null) {
+				dataSource = ioc.get(DruidDataSource.class, "dataSource");
+			}else {
+				try {
+					throw new Exception("ioc 为空啊！我也不知道怎么办啊~~");
+				} catch (Exception e) {
+					log.error(e);
+					e.printStackTrace();
+				}
+			}
+		}
 	}
 	
 	public DatabaseIdProvider getDatabaseIdProvider() {
@@ -179,6 +197,7 @@ public class SqlSessionFactoryBean {
 		try {
 			sqlSessionFactory = buildSqlSessionFactory();
 		} catch (IOException e) {
+			log.error(e);
 			e.printStackTrace();
 		}
 	}
@@ -190,6 +209,7 @@ public class SqlSessionFactoryBean {
 					try {
 						afterPropertiesSet();
 					} catch (Exception e) {
+						log.error(e);
 						e.printStackTrace();
 					}
 				}
@@ -281,28 +301,7 @@ public class SqlSessionFactoryBean {
 	    }
 	    
 	    if (this.dataSource == null) {
-	    	if (this.dataSourcePropsLocatetion != null) {
-				Properties dataSourceProps = Resources.getResourceAsProperties(dataSourcePropsLocatetion);
-				druidDataSource.setDriverClassName(dataSourceProps.getProperty("druid.driverClassName"));
-				druidDataSource.setUrl(dataSourceProps.getProperty("druid.url"));
-				druidDataSource.setUsername(dataSourceProps.getProperty("druid.username"));
-				druidDataSource.setPassword(dataSourceProps.getProperty("druid.password"));
-				druidDataSource.setRemoveAbandonedTimeout(Integer.valueOf(dataSourceProps.getProperty("druid.removeAbandonedTimeout")));
-				druidDataSource.setRemoveAbandoned(Boolean.valueOf(dataSourceProps.getProperty("druid.removeAbandoned")));
-				druidDataSource.setValidationQuery(dataSourceProps.getProperty("druid.validationQuery"));
-				druidDataSource.configFromPropety(dataSourceProps);
-				druidDataSource.setConnectProperties(dataSourceProps);
-				
-				this.databaseIdProvider.setProperties(dataSourceProps);
-				try {
-					druidDataSource.init();
-					this.dataSource = druidDataSource;
-				} catch (SQLException e) {
-					e.printStackTrace();
-				}
-			}else {
-				throw new IOException("dataSourcePropsLocatetion is null");
-			}
+	    	throw new IOException("dataSourcePropsLocatetion is null");
 	    }
 	    if (this.databaseIdProvider != null) {//fix #64 set databaseId before parse mapper xmls
 	    	try {

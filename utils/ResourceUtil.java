@@ -12,6 +12,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 
 /**
  * @author 黄小天 wongtp@outlook.com
@@ -104,10 +105,20 @@ public class ResourceUtil {
 		} catch (URISyntaxException e) {
 			e.printStackTrace();
 		}
-		if (classPath.indexOf("/") == 0) {
+		if (classPath.indexOf("/") == 0 && !isOSLinux()) {
 			classPath = classPath.substring(1);
 		}
 		return classPath;
 	}
+	
+	public static boolean isOSLinux() {
+        Properties prop = System.getProperties();
+        String os = prop.getProperty("os.name");
+        if (os != null && os.toLowerCase().indexOf("linux") > -1) {
+            return true;
+        } else {
+            return false;
+        }
+    }
 	
 }
