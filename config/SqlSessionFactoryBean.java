@@ -25,6 +25,7 @@ import org.apache.ibatis.transaction.TransactionFactory;
 import org.apache.ibatis.transaction.jdbc.JdbcTransactionFactory;
 import org.apache.ibatis.type.TypeHandler;
 import org.nutz.ioc.Ioc;
+import org.nutz.ioc.loader.annotation.IocBean;
 import org.nutz.log.Log;
 import org.nutz.log.Logs;
 import org.nutz.mvc.Mvcs;
@@ -39,7 +40,7 @@ import cn.wizzer.app.wb.modules.common.nutzMybatis.utils.StringUtil;
  * @author 黄小天 wongtp@outlook.com
  * @date 2018年2月11日 下午7:40:56
  */
-//@IocBean(name="sqlSessionFactoryBean")
+@IocBean(name="sqlSessionFactoryBean")
 public class SqlSessionFactoryBean {
 	
 	private static final Log log = Logs.get();
@@ -97,12 +98,7 @@ public class SqlSessionFactoryBean {
 			if (ioc != null) {
 				dataSource = ioc.get(DruidDataSource.class, "dataSource");
 			}else {
-				try {
-					throw new Exception("ioc 为空啊！我也不知道怎么办啊~~");
-				} catch (Exception e) {
-					log.error(e);
-					e.printStackTrace();
-				}
+				log.error("ioc 为空啊！我也不知道怎么办啊~~");
 			}
 		}
 	}

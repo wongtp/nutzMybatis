@@ -104,7 +104,7 @@ public class MapperReloader implements ServletContextListener, Runnable {
 			while (true) {  
 				try {
 					key = watcher.take();
-	            } catch (InterruptedException x) {
+	            } catch (Exception x) {
 	                return;
 	            }
 				for (WatchEvent<?> event: key.pollEvents()) {  
@@ -130,7 +130,7 @@ public class MapperReloader implements ServletContextListener, Runnable {
 	 * 判断是否在 debug 状态，如果不这样写的话可以另外写个配置文件
 	 * @return
 	 */
-	private boolean isDebug() {
+	protected boolean isDebug() {
 		List<String> args = ManagementFactory.getRuntimeMXBean().getInputArguments();
     	boolean isDebug = false;
     	for (String arg : args) {
