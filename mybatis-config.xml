@@ -8,6 +8,9 @@
         <setting name="lazyLoadingEnabled" value="false"/>
         <!-- 当启用时，有延迟加载属性的对象在被调用时将会被完全加载任意属性。否则每种属性将会按需要加载 -->
         <setting name="aggressiveLazyLoading" value="true"/>
+        <!-- 当查询到的数据为空时不会连字段都不返回 -->
+        <setting name="jdbcTypeForNull" value="NULL" />
+        <setting name="callSettersOnNulls" value="true"/>
     </settings>
 	<!-- 为方便操作数据 配置一个继承于hashMap 的 Record 类  -->
 	<typeAliases>

@@ -38,6 +38,7 @@ public class DataRecord extends HashMap<String, Object> implements Serializable 
     	try{
     		Object val = get(key);
     		if(null == val) return null;
+    		
     		return val.toString();
     	}catch(ClassCastException e) {
     		e.printStackTrace();
@@ -49,6 +50,8 @@ public class DataRecord extends HashMap<String, Object> implements Serializable 
     public Boolean getBoolean(String key) {
     	try{
     		Object value = get(key);
+    		if(value == null) return null;
+    		
         	if(value instanceof Boolean) {
     			return ((Boolean)value).booleanValue();
     		}else {
@@ -64,6 +67,8 @@ public class DataRecord extends HashMap<String, Object> implements Serializable 
     public Long getLong(String key) {
     	try{
     		Object value = get(key);
+    		if(value == null) return null;
+    		
         	if(value instanceof BigDecimal)  return ((BigDecimal)value).longValue();
     			
     		if(value instanceof Long) return (Long)value;
@@ -79,6 +84,8 @@ public class DataRecord extends HashMap<String, Object> implements Serializable 
     public Integer getInteger(String key) {
     	try{
     		Object value = get(key);
+    		if(value == null) return null;
+    		
     		if(value instanceof BigDecimal) return ((BigDecimal)value).intValue();
     			
     		if(value instanceof Long) return ((Long)value).intValue();
@@ -87,20 +94,47 @@ public class DataRecord extends HashMap<String, Object> implements Serializable 
     			
     		return Integer.valueOf(value.toString());
     	}catch(Exception e) {
+    		//e.printStackTrace();
+    		log.error("数据转换异常 【key：" + key + ", value：" + get(key) + " 】", e);
+    		return null;
+    	}
+    }
+    
+    public int getInt(String key) {
+    	Integer val = getInteger(key);
+    	return val == null?0:val;
+    }
+    
+    public Double getDouble(String key) {
+    	try {
+    		Object value = get(key);
+    		if(value == null) return null;
+    		
+    		if(value instanceof BigDecimal) return ((BigDecimal)value).doubleValue();
+    		
+    		if(value instanceof Double) return (Double)value;
+    	
+    		return Double.valueOf(value.toString());
+    		
+    	}catch(Exception e) {
     		e.printStackTrace();
     		log.error("数据转换异常 【key：" + key + ", value：" + get(key) + " 】", e);
     		return null;
     	}
     }
     
-    public Double getDouble(String key) {
+    public Float getFloat(String key) {
     	try {
     		Object value = get(key);
-    		if(value instanceof BigDecimal) return ((BigDecimal)value).doubleValue();
+    		if(value == null) return null;
     		
-    		if(value instanceof Double) return (Double)value;
-    	
-    		return Double.valueOf(value.toString());
+    		if(value instanceof Float) return (Float)value;
+    		
+    		if(value instanceof BigDecimal) return ((BigDecimal)value).floatValue();
+    		
+    		if(value instanceof Double) return ((Double)value).floatValue();
+    		
+    		return Float.valueOf(value.toString());
     		
     	}catch(Exception e) {
     		e.printStackTrace();
