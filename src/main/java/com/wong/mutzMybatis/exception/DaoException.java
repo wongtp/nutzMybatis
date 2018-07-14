@@ -1,4 +1,4 @@
-package cn.wizzer.app.wb.modules.common.nutzMybatis.exception;
+package com.wong.mutzMybatis.exception;
 
 /**
  * @author 黄小天 wongtp@outlook.com

@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.wong</groupId>
+    <artifactId>nutzMybatis</artifactId>
+    <version>1.0-SNAPSHOT</version>
+
+    <properties>
+    	<nutz-version>1.r.66</nutz-version>
+        <java.version>1.8</java.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
+
+    <dependencies>
+		<!-- 数据库部分 start-->
+		<dependency>
+		    <groupId>org.mybatis</groupId>
+		    <artifactId>mybatis</artifactId>
+		    <version>3.4.6</version>
+		</dependency>
+		<dependency>
+		    <groupId>mysql</groupId>
+		    <artifactId>mysql-connector-java</artifactId>
+		    <version>5.1.46</version>
+		</dependency>
+		<dependency>
+		    <groupId>com.alibaba</groupId>
+		    <artifactId>druid</artifactId>
+		    <version>1.1.10</version>
+		</dependency>
+		<dependency>
+            <groupId>org.nutz</groupId>
+            <artifactId>nutz</artifactId>
+            <version>${nutz-version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.nutz</groupId>
+            <artifactId>nutz-plugins-daocache</artifactId>
+            <version>${nutz-version}</version>
+        </dependency>
+        
+    </dependencies>
+    <build>
+    	<sourceDirectory>src/main/java</sourceDirectory>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <includes>
+                    <include>**/*</include>
+                </includes>
+                <filtering>true</filtering>
+            </resource>
+        </resources>
+        <finalName>nutzMybatis</finalName>
+        <plugins>
+			<plugin>
+		        <groupId>org.apache.maven.plugins</groupId>
+		        <artifactId>maven-compiler-plugin</artifactId>
+		        <version>3.7.0</version>
+		        <configuration>
+					<source>1.8</source>
+					<target>1.8</target>
+					<encoding>UTF-8</encoding>
+		        </configuration>
+			</plugin>
+			<plugin>  
+          		<artifactId>maven-assembly-plugin</artifactId>  
+		        <configuration>  
+		          <descriptorRefs>  
+		            <descriptorRef>jar-with-dependencies</descriptorRef>  
+		          </descriptorRefs>  
+		          <archive>    
+                      <manifest>    
+                          <mainClass>com.wb.plugins.tomcat.listener.App</mainClass>  
+                      </manifest>  
+                 </archive>  
+		        </configuration>  
+		        <executions>  
+		          <execution>  
+		            <id>make-assembly</id> <!-- this is used for inheritance merges -->  
+		            <phase>package</phase> <!-- bind to the packaging phase -->  
+		            <goals>  
+		              <goal>single</goal>  
+		            </goals>  
+		          </execution>  
+		        </executions>  
+	       </plugin>
+			
+        </plugins>
+    </build>
+
+</project>

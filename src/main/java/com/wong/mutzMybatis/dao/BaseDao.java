@@ -1,12 +1,13 @@
-package cn.wizzer.app.wb.modules.common.nutzMybatis.dao;
+package com.wong.mutzMybatis.dao;
 
 import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
+
 import org.apache.ibatis.session.SqlSession;
 
-import cn.wizzer.app.wb.modules.common.nutzMybatis.dto.DataRecord;
-import cn.wizzer.app.wb.modules.common.nutzMybatis.exception.DaoException;
+import com.wong.mutzMybatis.dto.DataRecord;
+import com.wong.mutzMybatis.exception.DaoException;
 
 /**
  * @author 黄小天 wongtp@outlook.com
@@ -62,8 +63,9 @@ public interface BaseDao {
 	 * @param primaryKey ：主键名称
 	 * @param primaryKeyValue ：主键值
 	 * @return
+	 * @throws Exception 
 	 */
-	<T> T getDataRecord(String tableName, String primaryKey, Serializable primaryKeyValue);
+	DataRecord getDataRecord(String tableName, String primaryKey, Serializable primaryKeyValue) throws DaoException;
 	
 	/**
 	 * 查询多行数据
@@ -84,9 +86,11 @@ public interface BaseDao {
 	 * 查询多行数据
 	 * @param tableName ：表名
 	 * @param parameters ：where参数
+	 * @param sqlSession 
 	 * @return
+	 * @throws DaoException 
 	 */
-	<E> List<E> getTableList(String tableName, Object parameters);
+	List<DataRecord> getTableList(String tableName, Object parameters) throws DaoException;
 	
 	/**
 	 * 删除数据
@@ -318,8 +322,9 @@ public interface BaseDao {
 	 * @param tableName ：表名
 	 * @param parameters ：where参数
 	 * @return
+	 * @throws DaoException 
 	 */
-	Long getCount(String tableName, Map<String, Object> parameters);
+	Long getCount(String tableName, Map<String, Object> parameters) throws DaoException;
 	
 	/**
 	 * 获取一个不会自动提交提交的事务的 SqlSession，需要手动执行 session.commit() 和 session.close() 

@@ -1,7 +1,4 @@
-/**
- * 
- */
-package cn.wizzer.app.wb.modules.common.nutzMybatis.utils;
+package com.wong.mutzMybatis.utils;
 
 import java.io.IOException;
 import java.net.URISyntaxException;

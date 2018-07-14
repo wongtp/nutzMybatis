@@ -1,4 +1,4 @@
-package cn.wizzer.app.wb.modules.common.nutzMybatis.dao.impl;
+package com.wong.mutzMybatis.dao.impl;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -13,11 +13,12 @@ import org.nutz.ioc.loader.annotation.IocBean;
 import org.nutz.log.Log;
 import org.nutz.log.Logs;
 
-import cn.wizzer.app.wb.modules.common.nutzMybatis.config.SqlSessionFactoryBean;
-import cn.wizzer.app.wb.modules.common.nutzMybatis.dao.BaseDao;
-import cn.wizzer.app.wb.modules.common.nutzMybatis.dto.DataRecord;
-import cn.wizzer.app.wb.modules.common.nutzMybatis.exception.DaoException;
-import cn.wizzer.app.wb.modules.common.obj.Params;
+import com.wong.mutzMybatis.config.SqlSessionFactoryBean;
+import com.wong.mutzMybatis.dao.BaseDao;
+import com.wong.mutzMybatis.dto.DataRecord;
+import com.wong.mutzMybatis.exception.DaoException;
+import com.wong.mutzMybatis.mapping.BaseMapper;
+import com.wong.mutzMybatis.obj.Params;
 
 @IocBean(name="baseDao")
 public class BaseDaoImpl extends SqlSessionFactoryBean implements BaseDao {
@@ -74,13 +75,19 @@ public class BaseDaoImpl extends SqlSessionFactoryBean implements BaseDao {
 	}
 
 	@Override
-	public <T> T getDataRecord(String tableName, String primaryKey, Serializable primaryKeyValue) {
-		Map<String, Object> parameters = new HashMap<>();
-		parameters.put("tableName", tableName);
-		parameters.put("primaryKey", primaryKey);
-		parameters.put("primaryKeyValue", primaryKeyValue);
-		String statement = "com.wong.base.getDataRecord";
-		return this.getObject(statement, parameters);
+	public DataRecord getDataRecord(String tableName, String primaryKeyName, Serializable primaryKeyValue) throws DaoException {
+//		Map<String, Object> parameters = new HashMap<>();
+//		parameters.put("tableName", tableName);
+//		parameters.put("primaryKey", primaryKeyName);
+//		parameters.put("primaryKeyValue", primaryKeyValue);
+//		String statement = "com.wong.base.getDataRecord";
+//		return this.getObject(statement, parameters);
+		try {
+			BaseMapper mapper = getSession().getMapper(BaseMapper.class);
+			return mapper.getDataRecord(tableName, primaryKeyName, primaryKeyValue);
+		} catch (Exception e) {
+			throw new DaoException(e);
+		}
 	}
 
 	@Override
@@ -113,11 +120,17 @@ public class BaseDaoImpl extends SqlSessionFactoryBean implements BaseDao {
 	}
 	
 	@Override
-	public <E> List<E> getTableList(String tableName, Object parameters) {
-		Map<String, Object> param = new HashMap<>();
-		param.put("tableName", tableName);
-		param.put("parameters", parameters);
-		return this.getList("com.wong.base.getTableList", param);
+	public List<DataRecord> getTableList(String tableName, Object parameters) throws DaoException {
+//		Map<String, Object> param = new HashMap<>();
+//		param.put("tableName", tableName);
+//		param.put("parameters", parameters);
+//		return this.getList("com.wong.base.getTableList", param);
+		try {
+			BaseMapper mapper = getSession().getMapper(BaseMapper.class);
+			return mapper.getTableList(tableName, parameters);
+		} catch (Exception e) {
+			throw new DaoException(e);
+		}
 	}
 
 	@Override
@@ -163,12 +176,28 @@ public class BaseDaoImpl extends SqlSessionFactoryBean implements BaseDao {
 
 	@Override
 	public Integer delete(String tableName, String primaryKey, Serializable primaryKeyValue, SqlSession session) throws DaoException {
-		Map<String, Object> param = new HashMap<>();
-		param.put("tableName", tableName);
-		param.put("primaryKey", primaryKey);
-		param.put("primaryKeyValue", primaryKeyValue);
-		String statement = "com.wong.base.delete";
-		return this.delete(statement, param, session);
+//		Map<String, Object> param = new HashMap<>();
+//		param.put("tableName", tableName);
+//		param.put("primaryKey", primaryKey);
+//		param.put("primaryKeyValue", primaryKeyValue);
+//		String statement = "com.wong.base.delete";
+//		return this.delete(statement, param, session);
+		
+		int deleteCount = 0;
+		if (session == null) {
+			session = getSession();
+		}
+		try {
+			BaseMapper mapper = session.getMapper(BaseMapper.class);
+			deleteCount = mapper.delete(tableName, primaryKey, primaryKeyValue);
+			session.commit();
+		} catch (Exception e) {
+			session.rollback();
+			throw new DaoException(e);
+		} finally {
+			session.close();
+		}
+		return deleteCount;
 	}
 	
 	@Override
@@ -178,12 +207,28 @@ public class BaseDaoImpl extends SqlSessionFactoryBean implements BaseDao {
 
 	@Override
 	public Integer deletes(String tableName, String primaryKey, String primaryKeyValues, SqlSession session) throws DaoException {
-		Map<String, Object> param = new HashMap<>();
-		param.put("tableName", tableName);
-		param.put("primaryKey", primaryKey);
-		param.put("primaryKeyValues", primaryKeyValues);
-		String statement = "com.wong.base.deleteByIds";
-		return this.delete(statement, param, session);
+//		Map<String, Object> param = new HashMap<>();
+//		param.put("tableName", tableName);
+//		param.put("primaryKey", primaryKey);
+//		param.put("primaryKeyValues", primaryKeyValues);
+//		String statement = "com.wong.base.deleteByIds";
+//		return this.delete(statement, param, session);
+		int deleteCount = 0;
+		if (session == null) {
+			session = getSession();
+		}
+		try {
+			BaseMapper mapper = session.getMapper(BaseMapper.class);
+			deleteCount = mapper.deleteByIds(tableName, primaryKey, primaryKeyValues);
+			session.commit();
+		} catch (Exception e) {
+			session.rollback();
+			throw new DaoException(e);
+		} finally {
+			session.close();
+		}
+		return deleteCount;
+		
 	}
 	
 	@Override
@@ -193,7 +238,22 @@ public class BaseDaoImpl extends SqlSessionFactoryBean implements BaseDao {
 	
 	@Override
 	public Integer deletes(String tableName, Object parameters, SqlSession session) throws DaoException {
-		return this.delete("com.wong.base.deleteByParam", Params.NEW("tableName", tableName).put("parameters", parameters), session);
+		//return this.delete("com.wong.base.deleteByParam", Params.NEW("tableName", tableName).put("parameters", parameters), session);
+		int deleteCount = 0;
+		if (session == null) {
+			session = getSession();
+		}
+		try {
+			BaseMapper mapper = session.getMapper(BaseMapper.class);
+			deleteCount = mapper.deleteByParam(tableName, parameters);
+			session.commit();
+		} catch (Exception e) {
+			session.rollback();
+			throw new DaoException(e);
+		} finally {
+			session.close();
+		}
+		return deleteCount;
 	}
 	
 	@Override
@@ -216,22 +276,20 @@ public class BaseDaoImpl extends SqlSessionFactoryBean implements BaseDao {
 		Integer obj = null;
 		if (session == null) {
 			session = getSession();
-			try {
-				obj = session.update(statement, parameters);
-				session.commit();
-			} catch (Exception e) {
-				session.rollback();
-				throw new DaoException(e);
-			} finally {
-				BoundSql sqlLog = session.getConfiguration().getMappedStatement(statement).getBoundSql(parameters);
-				log.debug("\n执行statement:" + statement);
-				log.debug("\n执行sql:" + sqlLog.getSql());
-				log.debug("\n参数集:" + sqlLog.getParameterObject());
-				log.debug("\n结果集:" + obj);
-				session.close();
-			}
-		}else {
+		}
+		try {
 			obj = session.update(statement, parameters);
+			session.commit();
+		} catch (Exception e) {
+			session.rollback();
+			throw new DaoException(e);
+		} finally {
+			BoundSql sqlLog = session.getConfiguration().getMappedStatement(statement).getBoundSql(parameters);
+			log.debug("\n执行statement:" + statement);
+			log.debug("\n执行sql:" + sqlLog.getSql());
+			log.debug("\n参数集:" + sqlLog.getParameterObject());
+			log.debug("\n结果集:" + obj);
+			session.close();
 		}
 		return obj;
 	}
@@ -287,7 +345,22 @@ public class BaseDaoImpl extends SqlSessionFactoryBean implements BaseDao {
 		params.put("values", valuesStatement.toString());
 		params.put("where", whereStatement.toString());
 		params.putAll(values);
-		return this.update("com.wong.base.update", params, session);
+		//return this.update("com.wong.base.update", params, session);
+		int updateCount = 0;
+		if (session == null) {
+			session = getSession();
+		}
+		try {
+			BaseMapper mapper = session.getMapper(BaseMapper.class);
+			updateCount = mapper.update(params);
+			session.commit();
+		} catch (Exception e) {
+			session.rollback();
+			throw new DaoException(e);
+		} finally {
+			session.close();
+		}
+		return updateCount;
 	}
 	
 	@Override
@@ -350,7 +423,23 @@ public class BaseDaoImpl extends SqlSessionFactoryBean implements BaseDao {
 		params.put("columns", columnStatement.toString());
 		params.put("values", valueStatement.toString());
 		params.putAll(values);
-		return this.insert("com.wong.base.insert", params, session);
+		//return this.insert("com.wong.base.insert", params, session);
+		int insertCount = 0;
+		if (session == null) {
+			session = getSession();
+		}
+		try {
+			BaseMapper mapper = session.getMapper(BaseMapper.class);
+			insertCount = mapper.insert(params);
+			session.commit();
+		} catch (Exception e) {
+			session.rollback();
+			throw new DaoException(e);
+		} finally {
+			session.close();
+		}
+		return insertCount;
+		
 	}
 	
 	@Override
@@ -363,23 +452,21 @@ public class BaseDaoImpl extends SqlSessionFactoryBean implements BaseDao {
 		Integer obj = null;
 		if (session == null) {
 			session = getSession();
-			try {
-				obj = session.insert(statement, parameters);
-				session.commit();
-			} catch (Exception e) {
-				log.error(e);
-				session.rollback();
-				throw new DaoException(e);
-			} finally {
-				BoundSql sqlLog = session.getConfiguration().getMappedStatement(statement).getBoundSql(parameters);
-				log.debug("\n执行statement:" + statement);
-				log.debug("\n执行sql:" + sqlLog.getSql());
-				log.debug("\n参数集:" + sqlLog.getParameterObject());
-				log.debug("\n结果集：" + obj);
-				session.close();
-			}
-		}else {
+		}
+		try {
 			obj = session.insert(statement, parameters);
+			session.commit();
+		} catch (Exception e) {
+			log.error(e);
+			session.rollback();
+			throw new DaoException(e);
+		} finally {
+			BoundSql sqlLog = session.getConfiguration().getMappedStatement(statement).getBoundSql(parameters);
+			log.debug("\n执行statement:" + statement);
+			log.debug("\n执行sql:" + sqlLog.getSql());
+			log.debug("\n参数集:" + sqlLog.getParameterObject());
+			log.debug("\n结果集：" + obj);
+			session.close();
 		}
 		return obj;
 	}
@@ -394,7 +481,7 @@ public class BaseDaoImpl extends SqlSessionFactoryBean implements BaseDao {
 		Map<String, Object> param = new HashMap<>();
 		param.put("tableName", tableName);
 		param.put("dataList", dataList);
-		String statement = "com.wong.base.insertList";
+		//String statement = "com.wong.base.insertList";
 		
 		if(dataList.isEmpty()){
 			return 0;
@@ -420,18 +507,34 @@ public class BaseDaoImpl extends SqlSessionFactoryBean implements BaseDao {
 		parameters.put("columns", insertColumn);
 		parameters.put("items", pramaColumn);
 		
-		int count = 0;
 		//400条执行一次，避免sql语句过长无法执行
 		List<DataRecord> tempList = new ArrayList<DataRecord>();
-		for (int i = 0; i < dataList.size(); i++) {
-			tempList.add(dataList.get(i));
-			if((i+1) % 400 == 0 || i == dataList.size() - 1) {
-				parameters.put("list", tempList);
-				count += this.insert(statement, parameters, session);
-				tempList.clear();
-			}
+		
+		
+		int insertCount = 0;
+		if (session == null) {
+			session = getSession();
 		}
-		return count;
+		BaseMapper mapper = session.getMapper(BaseMapper.class);
+		try {
+			for (int i = 0; i < dataList.size(); i++) {
+				tempList.add(dataList.get(i));
+				if((i+1) % 400 == 0 || i == dataList.size() - 1) {
+					parameters.put("list", tempList);
+					//this.insert(statement, parameters, session);
+					insertCount += mapper.insertList(parameters);
+					
+					tempList.clear();
+				}
+			}
+			session.commit();
+		} catch (Exception e) {
+			session.rollback();
+			throw new DaoException(e);
+		} finally {
+			session.close();
+		}
+		return insertCount;
 	}
 	
 	@Override
@@ -440,9 +543,16 @@ public class BaseDaoImpl extends SqlSessionFactoryBean implements BaseDao {
 	}
 
 	@Override
-	public Long getCount(String tableName, Map<String, Object> parameters) {
-		String statement = "com.wong.base.getCount";
-		return this.getLong(statement, Params.NEW("tableName", tableName).put("parameters", parameters));
+	public Long getCount(String tableName, Map<String, Object> parameters) throws DaoException {
+		//String statement = "com.wong.base.getCount";
+		//return this.getLong(statement, Params.NEW("tableName", tableName).put("parameters", parameters));
+		BaseMapper mapper = getSession().getMapper(BaseMapper.class);
+		try {
+			return mapper.getCount(tableName, parameters);
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new DaoException(e);
+		}
 	}
 	
 	@Override

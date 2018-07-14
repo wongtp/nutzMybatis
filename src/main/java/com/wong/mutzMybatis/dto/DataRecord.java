@@ -1,4 +1,4 @@
-package cn.wizzer.app.wb.modules.common.nutzMybatis.dto;
+package com.wong.mutzMybatis.dto;
 
 import java.io.Serializable;
 import java.math.BigDecimal;

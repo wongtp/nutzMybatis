@@ -1,7 +1,4 @@
-/**
- * 
- */
-package cn.wizzer.app.wb.modules.common.nutzMybatis.obj;
+package com.wong.mutzMybatis.obj;
 
 import java.util.HashMap;
 

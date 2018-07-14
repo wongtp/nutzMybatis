@@ -11,8 +11,8 @@
 		SELECT * FROM ${tableName} t
 		where 1 = 1
 		<if test="parameters != null">
-			<foreach collection="parameters" index="key"  item="value" separator=" and " >
-	        	${key} = #{value}
+			<foreach collection="parameters" index="key"  item="value" separator=" " >
+	        	and ${key} = #{value}
 		    </foreach>
 		</if>
 	</select>
@@ -20,9 +20,8 @@
 	<select id="getCount" resultType="java.lang.Long">
 		SELECT count(0) FROM ${tableName} t where 1 = 1
 		<if test="parameters != null">
-			and 
-			<foreach collection="parameters" index="key"  item="value" separator=" and " >
-	        	${key} = #{value} 
+			<foreach collection="parameters" index="key"  item="value" separator=" " >
+	        	and  ${key} = #{value} 
 		    </foreach>
 		</if>
 	</select>
@@ -39,9 +38,8 @@
 		<if test="parameters != null and tableName!=null and tableName != '' ">
 			delete from ${tableName} WHERE 1 = 1
 			<if test="parameters != null">
-				and 
-				<foreach collection="parameters" index="key"  item="value" separator=" and " >
-		        	${key} = #{value} 
+				<foreach collection="parameters" index="key"  item="value" separator=" " >
+		        	and ${key} = #{value} 
 			    </foreach>
 			</if>
 	    </if>
