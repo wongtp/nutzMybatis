@@ -331,6 +331,6 @@ public interface BaseDao {
 	 * 适用于多个方法对单/多张表同时执行操作
 	 * @return
 	 */
-	SqlSession getSession();
+	SqlSession getSession(boolean autoCommitFlag);
 
 }

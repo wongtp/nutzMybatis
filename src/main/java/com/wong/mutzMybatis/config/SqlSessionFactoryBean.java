@@ -52,10 +52,6 @@ public class SqlSessionFactoryBean {
 
 	private String environment = SqlSessionFactoryBean.class.getSimpleName();
 
-	public void DataSource(DataSource dataSource) {
-		this.dataSource = dataSource;
-	}
-  
 	private DataSource getDataSource() throws IOException {
 		if (dataSource == null) {
 			Ioc ioc = Mvcs.getIoc();
@@ -100,39 +96,28 @@ public class SqlSessionFactoryBean {
 		return config;
 	}
 	
-	public void afterPropertiesSet() {
-		if (sqlSessionFactoryBuilder == null) {
-			throw new IllegalArgumentException("Property 'sqlSessionFactoryBuilder' is required");
-		}
-		try {
-			sqlSessionFactory = buildSqlSessionFactory();
-		} catch (IOException e) {
-			log.error(e);
-			e.printStackTrace();
-		}
-	}
-	  
 	public SqlSessionFactory getSqlSessionFactory() {
-		if (sqlSessionFactory == null) {
-			synchronized (this) {
-				if (sqlSessionFactory == null) {
-					try {
-						afterPropertiesSet();
-					} catch (Exception e) {
-						log.error(e);
-						e.printStackTrace();
-					}
-				}
+		if (this.sqlSessionFactory == null) {
+			try {
+				this.sqlSessionFactory = buildSqlSessionFactory();
+			} catch (Exception e) {
+				log.error(e);
+				e.printStackTrace();
 			}
 		}
-		return sqlSessionFactory;
+		return this.sqlSessionFactory;
 	}
-
+	
+	public SqlSessionFactory buildSqlSessionFactory(Configuration configuration) throws IOException {
+		this.sqlSessionFactory = this.sqlSessionFactoryBuilder.build(configuration);
+	    return this.sqlSessionFactory;
+	}
+	
 	protected SqlSessionFactory buildSqlSessionFactory() throws IOException {
 	    Configuration configuration = getConfiguration();
 	    this.dataSource = getDataSource();
 	    if (this.dataSource == null) {
-	    	throw new IOException("dataSourcePropsLocatetion is null");
+	    	throw new IOException("dataSource is null");
 	    }
 	    if (this.databaseIdProvider != null) {
 	    	try {
@@ -166,8 +151,7 @@ public class SqlSessionFactoryBean {
 	    		log.debug("Property 'mapperLocations' was not specified or no matching resources found");
 	    	}
 	    }
-	    return this.sqlSessionFactoryBuilder.build(configuration);
+	    return buildSqlSessionFactory(configuration);
 	}
-	
 }
 

@@ -9,6 +9,7 @@ import java.util.Set;
 
 import org.apache.ibatis.mapping.BoundSql;
 import org.apache.ibatis.session.SqlSession;
+import org.nutz.ioc.loader.annotation.Inject;
 import org.nutz.ioc.loader.annotation.IocBean;
 import org.nutz.log.Log;
 import org.nutz.log.Logs;
@@ -21,10 +22,12 @@ import com.wong.mutzMybatis.mapping.BaseMapper;
 import com.wong.mutzMybatis.obj.Params;
 
 @IocBean(name="baseDao")
-public class BaseDaoImpl extends SqlSessionFactoryBean implements BaseDao {
+public class BaseDaoImpl implements BaseDao {
 	
 	private static final Log log = Logs.get();
 	private final SqlSession nullSession = null;//因为下面的方法有些太类似了，会有参数模糊的情况，所以用这个来区分开
+	@Inject
+    private SqlSessionFactoryBean sqlSessionFactoryBean;
 	
 	@Override
 	public Integer getInt(String statement, Object parameters) {
@@ -47,7 +50,7 @@ public class BaseDaoImpl extends SqlSessionFactoryBean implements BaseDao {
 	@Override
 	public <T> T getObject(String statement, Object parameters) {
 		T obj = null;
-		SqlSession session = getSqlSessionFactory().openSession(true);
+		SqlSession session = getSession(true);
 		try {
 			obj = session.selectOne(statement, parameters);
 		} catch (Exception e) {
@@ -83,7 +86,7 @@ public class BaseDaoImpl extends SqlSessionFactoryBean implements BaseDao {
 //		String statement = "com.wong.base.getDataRecord";
 //		return this.getObject(statement, parameters);
 		try {
-			BaseMapper mapper = getSession().getMapper(BaseMapper.class);
+			BaseMapper mapper = getSession(true).getMapper(BaseMapper.class);
 			return mapper.getDataRecord(tableName, primaryKeyName, primaryKeyValue);
 		} catch (Exception e) {
 			throw new DaoException(e);
@@ -98,7 +101,7 @@ public class BaseDaoImpl extends SqlSessionFactoryBean implements BaseDao {
 	@Override
 	public <E> List<E> getList(String statement, Object parameters) {
 		List<E> obj = null;
-		SqlSession session = getSqlSessionFactory().openSession(true);
+		SqlSession session = getSession(true);
 		try {
 			obj = session.selectList(statement, parameters);
 		} catch (Exception e) {
@@ -126,7 +129,7 @@ public class BaseDaoImpl extends SqlSessionFactoryBean implements BaseDao {
 //		param.put("parameters", parameters);
 //		return this.getList("com.wong.base.getTableList", param);
 		try {
-			BaseMapper mapper = getSession().getMapper(BaseMapper.class);
+			BaseMapper mapper = getSession(true).getMapper(BaseMapper.class);
 			return mapper.getTableList(tableName, parameters);
 		} catch (Exception e) {
 			throw new DaoException(e);
@@ -147,7 +150,7 @@ public class BaseDaoImpl extends SqlSessionFactoryBean implements BaseDao {
 	public Integer delete(String statement, Object parameters, SqlSession session) throws DaoException {
 		Integer obj = null;
 		if (session == null) {
-			session = getSession();
+			session = getSession(false);
 			try {
 				obj = session.delete(statement, parameters);
 				session.commit();
@@ -185,7 +188,7 @@ public class BaseDaoImpl extends SqlSessionFactoryBean implements BaseDao {
 		
 		int deleteCount = 0;
 		if (session == null) {
-			session = getSession();
+			session = getSession(false);
 		}
 		try {
 			BaseMapper mapper = session.getMapper(BaseMapper.class);
@@ -215,7 +218,7 @@ public class BaseDaoImpl extends SqlSessionFactoryBean implements BaseDao {
 //		return this.delete(statement, param, session);
 		int deleteCount = 0;
 		if (session == null) {
-			session = getSession();
+			session = getSession(false);
 		}
 		try {
 			BaseMapper mapper = session.getMapper(BaseMapper.class);
@@ -241,7 +244,7 @@ public class BaseDaoImpl extends SqlSessionFactoryBean implements BaseDao {
 		//return this.delete("com.wong.base.deleteByParam", Params.NEW("tableName", tableName).put("parameters", parameters), session);
 		int deleteCount = 0;
 		if (session == null) {
-			session = getSession();
+			session = getSession(false);
 		}
 		try {
 			BaseMapper mapper = session.getMapper(BaseMapper.class);
@@ -275,7 +278,7 @@ public class BaseDaoImpl extends SqlSessionFactoryBean implements BaseDao {
 	public Integer update(String statement, Object parameters, SqlSession session) throws DaoException {
 		Integer obj = null;
 		if (session == null) {
-			session = getSession();
+			session = getSession(false);
 		}
 		try {
 			obj = session.update(statement, parameters);
@@ -348,7 +351,7 @@ public class BaseDaoImpl extends SqlSessionFactoryBean implements BaseDao {
 		//return this.update("com.wong.base.update", params, session);
 		int updateCount = 0;
 		if (session == null) {
-			session = getSession();
+			session = getSession(false);
 		}
 		try {
 			BaseMapper mapper = session.getMapper(BaseMapper.class);
@@ -426,7 +429,7 @@ public class BaseDaoImpl extends SqlSessionFactoryBean implements BaseDao {
 		//return this.insert("com.wong.base.insert", params, session);
 		int insertCount = 0;
 		if (session == null) {
-			session = getSession();
+			session = getSession(false);
 		}
 		try {
 			BaseMapper mapper = session.getMapper(BaseMapper.class);
@@ -451,7 +454,7 @@ public class BaseDaoImpl extends SqlSessionFactoryBean implements BaseDao {
 	public Integer insert(String statement, Object parameters, SqlSession session) throws DaoException {
 		Integer obj = null;
 		if (session == null) {
-			session = getSession();
+			session = getSession(false);
 		}
 		try {
 			obj = session.insert(statement, parameters);
@@ -513,7 +516,7 @@ public class BaseDaoImpl extends SqlSessionFactoryBean implements BaseDao {
 		
 		int insertCount = 0;
 		if (session == null) {
-			session = getSession();
+			session = getSession(false);
 		}
 		BaseMapper mapper = session.getMapper(BaseMapper.class);
 		try {
@@ -546,7 +549,7 @@ public class BaseDaoImpl extends SqlSessionFactoryBean implements BaseDao {
 	public Long getCount(String tableName, Map<String, Object> parameters) throws DaoException {
 		//String statement = "com.wong.base.getCount";
 		//return this.getLong(statement, Params.NEW("tableName", tableName).put("parameters", parameters));
-		BaseMapper mapper = getSession().getMapper(BaseMapper.class);
+		BaseMapper mapper = getSession(true).getMapper(BaseMapper.class);
 		try {
 			return mapper.getCount(tableName, parameters);
 		} catch (Exception e) {
@@ -556,8 +559,8 @@ public class BaseDaoImpl extends SqlSessionFactoryBean implements BaseDao {
 	}
 	
 	@Override
-	public SqlSession getSession() {
-		return getSqlSessionFactory().openSession(false);
+	public SqlSession getSession(boolean autoCommitFlag) {
+		return sqlSessionFactoryBean.getSqlSessionFactory().openSession(autoCommitFlag);
 	}
 
 }
