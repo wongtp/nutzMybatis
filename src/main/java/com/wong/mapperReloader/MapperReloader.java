@@ -1,7 +1,6 @@
 package com.wong.mapperReloader;
 
 import java.io.IOException;
-import java.lang.management.ManagementFactory;
 import java.lang.reflect.Field;
 import java.nio.file.FileSystems;
 import java.nio.file.Paths;
@@ -42,20 +41,13 @@ import com.wong.mutzMybatis.utils.ResourceUtil;
 public class MapperReloader implements ServletContextListener, Runnable {
 	
 	private static String[] mappers = ResourceUtil.getMappers(); 
-	private static WatchService watcher = null;
-	private static WatchKey key = null;
-	private static boolean isWatcher = true;
 	
     @Override  
     public void contextInitialized(ServletContextEvent sce) {
-    	//判断在 debug 模式下才做重新加载 mapper 文件的操作
-    	if (isDebug()) {
-    		isWatcher = true;
-    		//新开一条线程，而不至于阻塞
-    		Thread thread = new Thread(new MapperReloader());
-    		thread.start();
-    		sce.getServletContext().setAttribute("currentThread", thread);
-		}
+		//新开一条线程，而不至于阻塞
+		Thread thread = new Thread(new MapperReloader());
+		thread.start();
+		sce.getServletContext().setAttribute("currentThread", thread);
     }
     
     /**
@@ -63,19 +55,6 @@ public class MapperReloader implements ServletContextListener, Runnable {
      */
     @Override  
     public void contextDestroyed(ServletContextEvent sce) {
-    	isWatcher = false;
-    	if(key != null ) {
-    		key.reset();
-    		key.cancel();
-    	}
-    	if(watcher != null ) {
-    		try {
-    			watcher.poll();
-    			watcher.close();
-    		} catch (IOException e) {
-    			e.printStackTrace();
-    		}
-    	}
     	Thread thread = (Thread) sce.getServletContext().getAttribute("currentThread");
     	if (thread != null) {
     		thread.interrupt();
@@ -89,55 +68,36 @@ public class MapperReloader implements ServletContextListener, Runnable {
 		if (mapperDirs != null && mapperDirs.size() > 0) {
 			try {
 				//开启一个文件监视器
-				watcher = FileSystems.getDefault().newWatchService();
+				WatchService watcher = FileSystems.getDefault().newWatchService();
 				//把所有要监控的目录都注册进来
 				for (String dir : mapperDirs) {
 					System.out.println("监控mapper目录：" + dir);
 					Paths.get(dir).register(watcher, StandardWatchEventKinds.ENTRY_MODIFY);
 				}
-			} catch (IOException e) {
-				e.printStackTrace();
-			} 
-			long formerly = 0;
-			while (true) {  
-				try {
+				
+				long formerly = 0;
+				WatchKey key;
+				while (true) {  
+					if (Thread.currentThread().isInterrupted()) {
+						break;
+					}
 					key = watcher.take();
-	            } catch (Exception x) {
-	                return;
-	            }
-				for (WatchEvent<?> event: key.pollEvents()) {  
-	                long current = System.currentTimeMillis();
-	                //10秒内防止重复加载 mapper 文件，因为这个监视器会跳出来两次文件被修改的信号； 同样这些目录都是只监控文件的修改就行了，创建和删除好像没必要
-	                if (current - formerly > 10000 && "ENTRY_MODIFY".equals(event.kind().toString())) {
-	                	try {
-	                		reloadXML(event.context().toString());
-	                	} catch (Exception e1) {
-	                		e1.printStackTrace();
-	                	}  
-	                	formerly = current;
-	                }
-	            }
-				if (!key.reset() || !isWatcher) {  
-					break;  
-				}  
-			} 
+					for (WatchEvent<?> event: key.pollEvents()) {  
+		                long current = System.currentTimeMillis();
+		                //10秒内防止重复加载 mapper 文件，因为这个监视器会跳出来两次文件被修改的信号； 同样这些目录都是只监控文件的修改就行了，创建和删除好像没必要
+		                if (current - formerly > 10000 && "ENTRY_MODIFY".equals(event.kind().toString())) {
+		                	reloadXML(event.context().toString());
+		                	formerly = current;
+		                }
+		            }
+					if (!key.reset()) {  
+						break;  
+					}  
+				} 
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 		}
-	}
-	
-	/**
-	 * 判断是否在 debug 状态，如果不这样写的话可以另外写个配置文件
-	 * @return
-	 */
-	protected boolean isDebug() {
-		List<String> args = ManagementFactory.getRuntimeMXBean().getInputArguments();
-    	boolean isDebug = false;
-    	for (String arg : args) {
-    		if (arg.startsWith("-agentlib:jdwp")) {
-    			isDebug = true;
-    			break;
-    	 	}
-    	}
-		return isDebug;
 	}
 	
 	public void reloadXML(String fileName) {
