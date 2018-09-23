@@ -40,25 +40,14 @@ import com.wong.mutzMybatis.utils.ResourceUtil;
 @WebListener
 public class MapperReloader implements ServletContextListener, Runnable {
 	
-	private static String[] mappers = ResourceUtil.getMappers(); 
+	private static String[] mappers = ResourceUtil.getMappers();
 	
     @Override  
     public void contextInitialized(ServletContextEvent sce) {
 		//新开一条线程，而不至于阻塞
 		Thread thread = new Thread(new MapperReloader());
+		thread.setDaemon(true); // 设置为守护线程
 		thread.start();
-		sce.getServletContext().setAttribute("currentThread", thread);
-    }
-    
-    /**
-     * 如果不写的话貌似在 tomcat 自动重启的时候会销毁不了而报错
-     */
-    @Override  
-    public void contextDestroyed(ServletContextEvent sce) {
-    	Thread thread = (Thread) sce.getServletContext().getAttribute("currentThread");
-    	if (thread != null) {
-    		thread.interrupt();
-		}
     }
     
 	@Override
@@ -78,9 +67,6 @@ public class MapperReloader implements ServletContextListener, Runnable {
 				long formerly = 0;
 				WatchKey key;
 				while (true) {  
-					if (Thread.currentThread().isInterrupted()) {
-						break;
-					}
 					key = watcher.take();
 					for (WatchEvent<?> event: key.pollEvents()) {  
 		                long current = System.currentTimeMillis();
